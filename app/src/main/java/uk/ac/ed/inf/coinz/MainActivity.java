@@ -1,12 +1,12 @@
 package uk.ac.ed.inf.coinz;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mapbox.geojson.Point;
 
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Bitmap;
 import android.location.Location;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +21,8 @@ import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -33,6 +35,9 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.android.core.location.LocationEngineProvider;
 
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -78,12 +83,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //getting json string from specific date url
         try {
             json = getData.execute(mapURLstring).get();
-            Log.d("json file","completed");
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+            Log.d("json file downloaded","completed");
+        } catch (ExecutionException|InterruptedException e) {
             e.printStackTrace();
         }
+
+        //getting rates of today's date currencies
+        JsonParser parser = new JsonParser();
+        JsonObject tempObj = (JsonObject) parser.parse(json);
+        JsonObject rates = (JsonObject) tempObj.get("rates");
+
+        Double SHILrate = Double.valueOf(rates.get("SHIL").toString());
+        Double QUIDrate = Double.valueOf(rates.get("QUID").toString());
+        Double DOLRrate = Double.valueOf(rates.get("DOLR").toString());
+        Double PENYrate = Double.valueOf(rates.get("PENY").toString());
+
         //extracting the properties and geometry from each feature to create markers
         FeatureCollection fc = FeatureCollection.fromJson(json);
 
@@ -94,6 +108,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Double longitude = pt.coordinates().get(0);
             Double latitude = pt.coordinates().get(1);
             String markerTitle = String.valueOf(j.get("currency")) + ": "  + String.valueOf(j.get("value"));
+            String markerColor = String.valueOf(j.get("marker-color"));
+            String markerNumber = String.valueOf(j.get("marker-symbol"));
+            String firsthalfurl = "http://a.tiles.mapbox.com/v4/marker/pin-m-";
+            String secondhalfurl = ".png?access_token=pk.eyJ1Ijoibmlja2ZpbCIsImEiOiJjam55bGRjZHEwZTh1M2xwOWpqdjRjcDhwIn0.FhMCVf5LAlvD7Im8-Xpsvw";
+            String markerUrl = firsthalfurl+markerNumber.substring(1, 2)+"+"+markerColor.substring(2,8)+secondhalfurl;
 
             MarkerOptions marker = new MarkerOptions().position(new LatLng(latitude, longitude))
                     .title(markerTitle)
