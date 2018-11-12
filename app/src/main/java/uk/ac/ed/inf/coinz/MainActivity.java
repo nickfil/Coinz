@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.mapbox.geojson.Point;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.ScaleDrawable;
 import android.location.Location;
 import android.media.Image;
 import android.os.Bundle;
@@ -107,16 +108,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             Double longitude = pt.coordinates().get(0);
             Double latitude = pt.coordinates().get(1);
-            String markerTitle = String.valueOf(j.get("currency")) + ": "  + String.valueOf(j.get("value"));
-            String markerColor = String.valueOf(j.get("marker-color"));
-            String markerNumber = String.valueOf(j.get("marker-symbol"));
-            String firsthalfurl = "http://a.tiles.mapbox.com/v4/marker/pin-m-";
-            String secondhalfurl = ".png?access_token=pk.eyJ1Ijoibmlja2ZpbCIsImEiOiJjam55bGRjZHEwZTh1M2xwOWpqdjRjcDhwIn0.FhMCVf5LAlvD7Im8-Xpsvw";
-            String markerUrl = firsthalfurl+markerNumber.substring(1, 2)+"+"+markerColor.substring(2,8)+secondhalfurl;
+            String currency = String.valueOf(j.get("currency")).substring(1,5);
+            String value = String.valueOf(j.get("value")).substring(1, String.valueOf(j.get("value")).length()-1);
+            String markerTitle = currency + ": "  + value;
+            IconFactory icon1= IconFactory.getInstance(getApplicationContext());
+            Icon icon = null;
+
+            if(currency.equals("SHIL")) {
+                icon = icon1.fromResource(R.drawable.blue);
+            }
+            else if(currency.equals("DOLR")){
+                icon = icon1.fromResource(R.drawable.green);
+            }
+            else if(currency.equals("QUID")){
+                icon = icon1.fromResource(R.drawable.yellow);
+            }
+            else if(currency.equals("PENY")){
+                icon = icon1.fromResource(R.drawable.red);
+            }
+
 
             MarkerOptions marker = new MarkerOptions().position(new LatLng(latitude, longitude))
                     .title(markerTitle)
-                    .snippet(String.valueOf(j.get("id")));
+                    .icon(icon)
+                    .snippet(String.valueOf(j.get("id")).substring(1, String.valueOf(j.get("id")).length()-1));
+
             map.addMarker(marker);
         }
 
