@@ -7,6 +7,7 @@ import com.mapbox.geojson.Point;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ScaleDrawable;
 import android.location.Location;
+import android.location.LocationListener;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -26,6 +27,7 @@ import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
@@ -39,8 +41,10 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -54,6 +58,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationLayerPlugin locationLayerPlugin;
     private Location originLocation;
     public static TextView data;
+    private my_wallet wallet;
+    private HashMap<String, Double> todaysRates = new HashMap<>();
+    private CollectingCoinz collectingCoinz;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
-
     }
 
     @Override
@@ -77,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         int month = Calendar.getInstance().get(Calendar.MONTH);
         int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
         String json = "";
-        String mapURLstring = "http://homepages.inf.ed.ac.uk/stg/coinz/2018/11/26/coinzmap.geojson";
+        String mapURLstring = "http://homepages.inf.ed.ac.uk/stg/coinz/2018/10/03/coinzmap.geojson";
 
         DownloadFileTask getData = new DownloadFileTask();
 
@@ -94,48 +100,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         JsonObject tempObj = (JsonObject) parser.parse(json);
         JsonObject rates = (JsonObject) tempObj.get("rates");
 
-        Double SHILrate = Double.valueOf(rates.get("SHIL").toString());
-        Double QUIDrate = Double.valueOf(rates.get("QUID").toString());
-        Double DOLRrate = Double.valueOf(rates.get("DOLR").toString());
-        Double PENYrate = Double.valueOf(rates.get("PENY").toString());
+        todaysRates.put("SHIL", Double.valueOf(rates.get("SHIL").toString()));
+        todaysRates.put("QUID", Double.valueOf(rates.get("QUID").toString()));
+        todaysRates.put("DOLR", Double.valueOf(rates.get("DOLR").toString()));
+        todaysRates.put("PENY", Double.valueOf(rates.get("PENY").toString()));
+
+        ArrayList<String> idz = new ArrayList<>();
+        wallet = new my_wallet(todaysRates, idz);
 
         //extracting the properties and geometry from each feature to create markers
         FeatureCollection fc = FeatureCollection.fromJson(json);
-
-        for(Feature feat : fc.features()){
-            Point pt = (Point) feat.geometry();
-            JsonObject j = feat.properties();
-
-            Double longitude = pt.coordinates().get(0);
-            Double latitude = pt.coordinates().get(1);
-            String currency = String.valueOf(j.get("currency")).substring(1,5);
-            String value = String.valueOf(j.get("value")).substring(1, String.valueOf(j.get("value")).length()-1);
-            String markerTitle = currency + ": "  + value;
-            IconFactory icon1= IconFactory.getInstance(getApplicationContext());
-            Icon icon = null;
-
-            if(currency.equals("SHIL")) {
-                icon = icon1.fromResource(R.drawable.blue);
-            }
-            else if(currency.equals("DOLR")){
-                icon = icon1.fromResource(R.drawable.green);
-            }
-            else if(currency.equals("QUID")){
-                icon = icon1.fromResource(R.drawable.yellow);
-            }
-            else if(currency.equals("PENY")){
-                icon = icon1.fromResource(R.drawable.red);
-            }
-
-
-            MarkerOptions marker = new MarkerOptions().position(new LatLng(latitude, longitude))
-                    .title(markerTitle)
-                    .icon(icon)
-                    .snippet(String.valueOf(j.get("id")).substring(1, String.valueOf(j.get("id")).length()-1));
-
-            map.addMarker(marker);
-        }
-
+        collectingCoinz = new CollectingCoinz(fc);
+        collectingCoinz.initializeMap(map);
     }
 
     private void enableLocation(){
@@ -152,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @SuppressWarnings("MissingPermission")
     private void initializeLocationEngine(){
         locationEngine=new LocationEngineProvider(this).obtainBestLocationEngineAvailable();
+        locationEngine.addLocationEngineListener(this);
         locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
         locationEngine.activate();
 
@@ -186,13 +163,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         locationEngine.requestLocationUpdates();
     }
 
+
     @Override
     public void onLocationChanged(Location location) {
         if(location!=null){
+            collectingCoinz.checkCoinCollection(map, location, wallet);
             originLocation=location;
             setCameraPosition(location);
         }
     }
+
 
     @Override
     public void onExplanationNeeded(List<String> permissionsToExplain) {
