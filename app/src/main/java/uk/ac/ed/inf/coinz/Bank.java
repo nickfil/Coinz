@@ -1,6 +1,7 @@
 package uk.ac.ed.inf.coinz;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Bank {
     private int numOfCoinzToday;
@@ -8,7 +9,17 @@ public class Bank {
     private Double DOLRs;
     private Double QUIDs;
     private Double PENYs;
-    public ArrayList<String> bankCoinIDs = new ArrayList<String>();
+    HashMap<String,Double> rates;
+    public ArrayList<Coin> bankCoinz;
+
+    public Bank(HashMap<String,Double> rates, ArrayList<Coin> bankCoinz){
+        this.rates = rates;
+        this.bankCoinz = bankCoinz;
+        SHILs=0.0;
+        DOLRs=0.0;
+        QUIDs=0.0;
+        PENYs=0.0;
+    }
 
     public void addCoinz(String currency, Double amount, String id){
         if(currency=="SHIL"){
@@ -23,7 +34,8 @@ public class Bank {
         else{
             PENYs+=amount;
         }
-        bankCoinIDs.add(id);
+        Coin c = new Coin(currency, amount, id);
+        bankCoinz.add(c);
         numOfCoinzToday++;
     }
 

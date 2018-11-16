@@ -41,6 +41,8 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -78,12 +80,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         enableLocation();
 
 
+        DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
         Date date = new Date();
-        int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH);
-        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        String dt = df.format(date);
         String json = "";
-        String mapURLstring = "http://homepages.inf.ed.ac.uk/stg/coinz/2018/10/03/coinzmap.geojson";
+        Log.d(dt, "Date format");
+        String mapURLstring = "http://homepages.inf.ed.ac.uk/stg/coinz/"+dt+"/coinzmap.geojson";
 
         DownloadFileTask getData = new DownloadFileTask();
 
@@ -105,8 +107,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         todaysRates.put("DOLR", Double.valueOf(rates.get("DOLR").toString()));
         todaysRates.put("PENY", Double.valueOf(rates.get("PENY").toString()));
 
-        ArrayList<String> idz = new ArrayList<>();
-        wallet = new my_wallet(todaysRates, idz);
+        //ArrayList<Coin> Coinz = new ArrayList<>();
+        wallet = new my_wallet(todaysRates, SaveSharedPreference.getWalletCoin(getApplicationContext()));
 
         //extracting the properties and geometry from each feature to create markers
         FeatureCollection fc = FeatureCollection.fromJson(json);
