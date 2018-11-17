@@ -1,6 +1,6 @@
 package uk.ac.ed.inf.coinz;
 
-public class Coin {
+public class Coin { //coin object, contains a currency, value and an id
 
     private String  id;
     private String currency;

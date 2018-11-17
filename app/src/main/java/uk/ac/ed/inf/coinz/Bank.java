@@ -3,6 +3,8 @@ package uk.ac.ed.inf.coinz;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
+
 public class Bank {
     private int numOfCoinzToday;
     private Double SHILs;
@@ -19,6 +21,24 @@ public class Bank {
         DOLRs=0.0;
         QUIDs=0.0;
         PENYs=0.0;
+        if(!bankCoinz.isEmpty()) {
+            for (Coin c : bankCoinz) {
+                if(c.getCoinCurrency().equals("SHIL")){
+                    SHILs+=c.getCoinValue();
+                }
+                else if(c.getCoinCurrency().equals("DOLR")){
+                    DOLRs+=c.getCoinValue();
+                }
+                else if(c.getCoinCurrency().equals("QUID")){
+                    QUIDs+=c.getCoinValue();
+                }
+                else{
+                    PENYs+=c.getCoinValue();
+                }
+            }
+        }
+        numOfCoinzToday = SaveSharedPreference.getNumofBankedToday(getApplicationContext());
+
     }
 
     public void addCoinz(String currency, Double amount, String id){
@@ -37,6 +57,7 @@ public class Bank {
         Coin c = new Coin(currency, amount, id);
         bankCoinz.add(c);
         numOfCoinzToday++;
+        saveBank();
     }
 
     public Double getCoinAmount(String currency, Double[] rates){
@@ -59,5 +80,24 @@ public class Bank {
                     +getCoinAmount("PENY", rates)*rates[3];
             return total;
         }
+    }
+
+    public ArrayList<Coin> getCoinz(){
+        return bankCoinz;
+    }
+
+
+    public void saveBank(){
+        String cn;
+        int i=0;
+
+        for(Coin c : bankCoinz){
+            cn = c.getCoinCurrency()+":"+c.getCoinValue()+":"+c.getCoinId();
+            SaveSharedPreference.setWalletCoin(getApplicationContext(), "bankcoin"+":"+String.valueOf(i), cn);
+            i++;
+        }
+
+        SaveSharedPreference.setNumofBankedToday(getApplicationContext(),numOfCoinzToday );
+
     }
 }

@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Location originLocation;
     public static TextView data;
     private my_wallet wallet;
+    private Bank bank;
     private HashMap<String, Double> todaysRates = new HashMap<>();
     private CollectingCoinz collectingCoinz;
 
@@ -107,13 +108,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         todaysRates.put("DOLR", Double.valueOf(rates.get("DOLR").toString()));
         todaysRates.put("PENY", Double.valueOf(rates.get("PENY").toString()));
 
-        //ArrayList<Coin> Coinz = new ArrayList<>();
+
         wallet = new my_wallet(todaysRates, SaveSharedPreference.getWalletCoin(getApplicationContext()));
+        bank = new Bank(todaysRates,SaveSharedPreference.getBankCoin(getApplicationContext()));
+
+        //if the date today is different than the last save, then the wallet is wiped clean since coinz have expired
+        if(!SaveSharedPreference.getLastSaveDate(getApplicationContext()).equals(dt)) {
+
+            Log.d(SaveSharedPreference.getLastSaveDate(getApplicationContext()),"date 1");
+            Log.d(dt, "date 2");
+
+            SaveSharedPreference.setNumofBankedToday(getApplicationContext(), 0);
+            wallet.wipeWallet();
+
+        }
 
         //extracting the properties and geometry from each feature to create markers
         FeatureCollection fc = FeatureCollection.fromJson(json);
         collectingCoinz = new CollectingCoinz(fc);
-        collectingCoinz.initializeMap(map);
+        collectingCoinz.initializeMap(map, wallet);
     }
 
     private void enableLocation(){
@@ -156,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void setCameraPosition(Location location){
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),
-                            location.getLongitude()), 13.0));
+                            location.getLongitude()), 15.0));
     }
 
     @SuppressWarnings("MissingPermission")

@@ -16,6 +16,7 @@ public class my_wallet{
     private Double PENYs;
     public HashMap<String, Double> rates;
     public ArrayList<Coin> walletCoinz;
+    String dt;
 
     public my_wallet(HashMap<String,Double> rates, ArrayList<Coin> walletCoinz){
         this.rates = rates;
@@ -24,6 +25,23 @@ public class my_wallet{
         DOLRs=0.0;
         QUIDs=0.0;
         PENYs=0.0;
+
+        if(!walletCoinz.isEmpty()) {
+            for (Coin c : walletCoinz) {
+                if(c.getCoinCurrency().equals("SHIL")){
+                    SHILs+=c.getCoinValue();
+                }
+                else if(c.getCoinCurrency().equals("DOLR")){
+                    DOLRs+=c.getCoinValue();
+                }
+                else if(c.getCoinCurrency().equals("QUID")){
+                    QUIDs+=c.getCoinValue();
+                }
+                else{
+                    PENYs+=c.getCoinValue();
+                }
+            }
+        }
     }
 
     public HashMap<String, Double> getRates() {
@@ -75,6 +93,7 @@ public class my_wallet{
         QUIDs=0.0;
         PENYs=0.0;
         walletCoinz.clear();
+        SaveSharedPreference.wipeWallet(getApplicationContext());
     }
 
     public ArrayList<Coin> getCoinz(){
@@ -84,7 +103,9 @@ public class my_wallet{
     public void saveWallet(){
         DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
         Date date = new Date();
-        String dt = df.format(date);
+        dt = df.format(date);
+
+        SaveSharedPreference.lastSaveDate(getApplicationContext(), dt);
 
         String cn;
         int i=0;
@@ -104,4 +125,20 @@ public class my_wallet{
         return false;
     }
 
+    public void sendToBank(Coin c){
+        if(c.getCoinCurrency().equals("SHIL")){                                        //and then add it to the relevant sub wallet
+            SHILs-=c.getCoinValue();
+        }
+        else if(c.getCoinCurrency().equals("DOLR")){
+            DOLRs-=c.getCoinValue();
+        }
+        else if(c.getCoinCurrency().equals("QUID")){
+            QUIDs-=c.getCoinValue();
+        }
+        else{
+            PENYs-=c.getCoinValue();
+        }
+        walletCoinz.remove(c);
+        //////////////////////////////////////////////////////////needs to be implemented
+    }
 }

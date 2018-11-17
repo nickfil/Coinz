@@ -20,7 +20,6 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import java.util.ArrayList;
 
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
-import static com.mapbox.mapboxsdk.Mapbox.getInstance;
 
 public class CollectingCoinz {
 
@@ -31,7 +30,7 @@ public class CollectingCoinz {
         this.fc = fc;
     }
 
-    public void initializeMap(MapboxMap map){
+    public void initializeMap(MapboxMap map, my_wallet wallet){
         for(Feature feat : fc.features()){
             Point pt = (Point) feat.geometry();
             JsonObject j = feat.properties();
@@ -59,15 +58,16 @@ public class CollectingCoinz {
                 icon = icon1.fromResource(R.drawable.red);
             }
 
+
             MarkerViewOptions marker = new MarkerViewOptions().position(new LatLng(latitude, longitude))
                     .title(markerTitle)
                     .icon(icon)
                     .snippet(String.valueOf(j.get("id")).substring(1, String.valueOf(j.get("id")).length()-1));
 
-
-            map.addMarker(marker);
-            markers.add(marker);
-
+            if(!wallet.contains(marker.getSnippet())) { //if a coin is already in the wallet, it is not added to the map
+                map.addMarker(marker);
+                markers.add(marker);
+            }
         }
     }
 
