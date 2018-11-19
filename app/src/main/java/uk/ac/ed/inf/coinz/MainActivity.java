@@ -1,33 +1,27 @@
 package uk.ac.ed.inf.coinz;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.mapbox.geojson.Point;
-
-import android.graphics.Bitmap;
-import android.graphics.drawable.ScaleDrawable;
+import android.content.Intent;
 import android.location.Location;
-import android.location.LocationListener;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.android.core.location.LocationEnginePriority;
+import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
-import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.Icon;
-import com.mapbox.mapboxsdk.annotations.IconFactory;
-import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.annotations.MarkerOptions;
-import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
@@ -36,15 +30,9 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
-import com.mapbox.android.core.location.LocationEngineProvider;
 
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -217,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             locationLayerPlugin.onStart();
         }
         mapView.onStart();
+
     }
 
     @Override
@@ -264,5 +253,47 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView.onSaveInstanceState(outState);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
+        switch (item.getItemId()) {
+            case R.id.Modes_Option:
+                // User chose the "Settings" item, show the app settings UI...
+                return true;
+
+            case R.id.Wallet_Option:
+
+                intent = new Intent(this, Wallet_Activity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.Bank_Option:
+
+                intent = new Intent(this, Bank_Activity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.LogOut_Option:
+
+                FirebaseAuth.getInstance().signOut();
+
+                intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
 }
 
