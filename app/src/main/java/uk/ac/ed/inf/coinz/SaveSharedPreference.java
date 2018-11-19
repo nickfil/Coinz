@@ -13,7 +13,7 @@ public class SaveSharedPreference {
     static final String player_username = "username";
     static final String coin1 = "coin";
 
-    static SharedPreferences getSharedPreferences(Context context){
+    private static SharedPreferences getSharedPreferences(Context context){
         return PreferenceManager.getDefaultSharedPreferences(context);
     }
 

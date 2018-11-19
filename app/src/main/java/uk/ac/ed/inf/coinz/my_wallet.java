@@ -14,9 +14,9 @@ public class my_wallet{
     private Double DOLRs;
     private Double QUIDs;
     private Double PENYs;
-    public HashMap<String, Double> rates;
-    public ArrayList<Coin> walletCoinz;
-    String dt;
+    private HashMap<String, Double> rates;
+    private ArrayList<Coin> walletCoinz;
+    private String dt;
 
     public my_wallet(HashMap<String,Double> rates, ArrayList<Coin> walletCoinz){
         this.rates = rates;
@@ -79,11 +79,10 @@ public class my_wallet{
             return PENYs;
         }
         else{
-            Double total = getCoinAmount("SHIL")*rates.get("SHIL")
+            return getCoinAmount("SHIL")*rates.get("SHIL")
                           +getCoinAmount("DOLR")*rates.get("DOLR")
                           +getCoinAmount("QUID")*rates.get("QUID")
                           +getCoinAmount("PENY")*rates.get("PENY");
-            return total;
         }
     }
 

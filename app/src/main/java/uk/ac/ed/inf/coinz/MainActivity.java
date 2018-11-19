@@ -47,10 +47,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationEngine locationEngine;
     private LocationLayerPlugin locationLayerPlugin;
     private Location originLocation;
-    public static TextView data;
-    private my_wallet wallet;
-    private Bank bank;
-    private HashMap<String, Double> todaysRates = new HashMap<>();
+    public TextView data;
+    public static my_wallet wallet;
+    public static Bank bank;
+    public static HashMap<String, Double> todaysRates = new HashMap<>();
     private CollectingCoinz collectingCoinz;
 
     @Override
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         Mapbox.getInstance (this, "pk.eyJ1Ijoibmlja2ZpbCIsImEiOiJjam55bGRjZHEwZTh1M2xwOWpqdjRjcDhwIn0.FhMCVf5LAlvD7Im8-Xpsvw");
         setContentView(R.layout.activity_main);
-        mapView = (MapView) findViewById(R.id.mapView);
+        mapView = this.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
     }

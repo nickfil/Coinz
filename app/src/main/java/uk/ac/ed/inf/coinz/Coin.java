@@ -12,6 +12,19 @@ public class Coin { //coin object, contains a currency, value and an id
         this.value=value;
     }
 
+    public Integer getIcon(){
+        switch (currency){
+            case "SHIL":
+                return R.drawable.blue;
+            case "DOLR":
+                return R.drawable.green;
+            case "QUID":
+                return R.drawable.yellow;
+            default:
+                return R.drawable.red;
+        }
+    }
+
     public String getCoinId(){
         return id;
     }
