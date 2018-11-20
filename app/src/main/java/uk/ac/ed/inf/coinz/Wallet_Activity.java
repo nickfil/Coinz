@@ -12,7 +12,6 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
-
 public class Wallet_Activity extends AppCompatActivity {
 
     ListView listView;
@@ -41,7 +40,7 @@ public class Wallet_Activity extends AppCompatActivity {
                 id.add(c.getCoinId());
             }
 
-            ListAdapter listAdapter = new ListAdapter(Wallet_Activity.this, currencies, values, icon, id);
+            ListAdapter listAdapter = new ListAdapter(Wallet_Activity.this, currencies, values, icon, id,1);
             listView.setAdapter(listAdapter);
         }
     }

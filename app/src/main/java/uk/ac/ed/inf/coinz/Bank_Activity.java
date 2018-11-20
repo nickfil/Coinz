@@ -3,6 +3,7 @@ package uk.ac.ed.inf.coinz;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -40,7 +41,8 @@ public class Bank_Activity extends AppCompatActivity {
                 id.add(c.getCoinId());
             }
 
-            ListAdapter listAdapter = new ListAdapter(Bank_Activity.this, currencies, values, icon, id);
+            ListAdapter listAdapter = new ListAdapter(Bank_Activity.this, currencies, values, icon, id,2);
+            Log.d(String.valueOf(values.size()), "Sizzzzzz");
             listView.setAdapter(listAdapter);
         }
     }

@@ -124,7 +124,7 @@ public class my_wallet{
         return false;
     }
 
-    public void sendToBank(Coin c){
+    public void Delete(Coin c){
         if(c.getCoinCurrency().equals("SHIL")){                                        //and then add it to the relevant sub wallet
             SHILs-=c.getCoinValue();
         }
@@ -138,6 +138,6 @@ public class my_wallet{
             PENYs-=c.getCoinValue();
         }
         walletCoinz.remove(c);
-        //////////////////////////////////////////////////////////needs to be implemented
+        saveWallet();
     }
 }

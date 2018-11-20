@@ -1,6 +1,7 @@
 package uk.ac.ed.inf.coinz;
 
 import android.app.AlertDialog;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.location.Location;
 import android.service.autofill.SaveRequest;
@@ -29,6 +30,7 @@ public class CollectingCoinz {
     public CollectingCoinz(FeatureCollection fc){
         this.fc = fc;
     }
+
 
     public void initializeMap(MapboxMap map, my_wallet wallet){
         for(Feature feat : fc.features()){
@@ -85,39 +87,21 @@ public class CollectingCoinz {
             Log.d(tempMarker.getSnippet(), "Marker ID");
 
             if(distance[0]<25 && !wallet.contains(tempMarker.getSnippet())){
-/*
-                AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-                builder.setTitle("Collection Opportunity");
-                builder.setMessage("Do you want to collect this coin?"+"\n"+tempMarker.getTitle());
-                builder.setCancelable(false);
-                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {*/
 
-                        String[] currency_value = tempMarker.getTitle().split(":");
-                        wallet.addCoinz(currency_value[0], Double.valueOf(currency_value[1]), tempMarker.getSnippet());
-                        Log.d(String.valueOf(wallet.getCoinAmount(currency_value[0])), "coin is collected");
+                String[] currency_value = tempMarker.getTitle().split(":");
+                wallet.addCoinz(currency_value[0], Double.valueOf(currency_value[1]), tempMarker.getSnippet());
+                Log.d(String.valueOf(wallet.getCoinAmount(currency_value[0])), "coin is collected");
 
-                        //after a marker is collected by a player, it must be removed from the map
-                        MarkerView currentmarker = tempMarker.getMarker();
-                        map.removeMarker(currentmarker);
-                        markers.remove(currentmarker); //it must also be removed from our marker array list so it is not plotted again
-                        fc.features().remove(currentmarker);
-                        wallet.saveWallet();
-                        Log.d(String.valueOf(wallet.getCoinz()),"Saved Wallet");
-                        Log.d(String.valueOf(wallet.getCoinz().size()), "number of coinz");
-                        /*dialog.cancel();
-                    }
-                });
-                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
+                //after a marker is collected by a player, it must be removed from the map
+                MarkerView currentmarker = tempMarker.getMarker();
+                map.removeMarker(currentmarker);
+                markers.remove(currentmarker); //it must also be removed from our marker array list so it is not plotted again
+                fc.features().remove(currentmarker);
 
-                AlertDialog alert = builder.create();
-                alert.show();*/
+
+                wallet.saveWallet();
+                Log.d(String.valueOf(wallet.getCoinz()),"Saved Wallet");
+                Log.d(String.valueOf(wallet.getCoinz().size()), "number of coinz");
 
             }
         }

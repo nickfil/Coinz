@@ -93,7 +93,7 @@ public class Bank {
 
         for(Coin c : bankCoinz){
             cn = c.getCoinCurrency()+":"+c.getCoinValue()+":"+c.getCoinId();
-            SaveSharedPreference.setWalletCoin(getApplicationContext(), "bankcoin"+":"+String.valueOf(i), cn);
+            SaveSharedPreference.setBankCoin(getApplicationContext(), "bankcoin"+":"+String.valueOf(i), cn);
             i++;
         }
 

@@ -107,4 +107,7 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="Deposit_Option">Deposit</string>
+    <string name="Send_Option">Send</string>
+    <string name="Delete_Option">Delete</string>
 </resources>
