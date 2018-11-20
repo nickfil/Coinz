@@ -41,7 +41,7 @@
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
         <activity
             android:name=".Modes_Activity"
-            android:label="Modes"
+            android:label="Bonus Features"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
     </application>
 

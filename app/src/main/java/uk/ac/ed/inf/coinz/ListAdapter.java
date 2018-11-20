@@ -67,11 +67,6 @@ public class ListAdapter extends ArrayAdapter{
 
                     popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         public boolean onMenuItemClick(MenuItem item) {
-                            Toast.makeText(
-                                    getContext(),
-                                    "You Clicked : " + item.getTitle(),
-                                    Toast.LENGTH_SHORT
-                            ).show();
 
                             Log.d(tt1.getText().toString(), "popup currency");
                             Log.d(tt2.getText().toString(), "popup value");
@@ -79,15 +74,27 @@ public class ListAdapter extends ArrayAdapter{
                             Coin c = new Coin(tt1.getText().toString(), Double.valueOf(tt2.getText().toString()), id1);
 
                             switch (item.getItemId()) {
+
                                 case R.id.Deposit:
-                                    MainActivity.wallet.Delete(c);
-                                    MainActivity.bank.addCoinz(c.getCoinCurrency(), c.getCoinValue(), c.getCoinId());
+                                    if(MainActivity.bank.addCoinz(c.getCoinCurrency(), c.getCoinValue(), c.getCoinId())) {
+                                        MainActivity.wallet.Delete(c);
+                                        removeCoin(position);
+                                        Toast.makeText(getContext(),"Coin Deposited", Toast.LENGTH_SHORT).show();
+                                        break;
+                                    }
+                                    Toast.makeText(getContext(),"Bank is full for today", Toast.LENGTH_SHORT).show();
+                                    break;
                                 case R.id.Send:
                                     MainActivity.wallet.Delete(c);
+                                    removeCoin(position);
+                                    Toast.makeText(getContext(),"Coin Sent", Toast.LENGTH_SHORT).show();
+                                    break;
                                 case R.id.Delete:
                                     MainActivity.wallet.Delete(c);
+                                    removeCoin(position);
+                                    Toast.makeText(getContext(),"Coin Deleted", Toast.LENGTH_SHORT).show();
+                                    break;
                             }
-                            removeCoin(position);
                             notifyDataSetChanged();
                             return true;
                         }

@@ -20,6 +20,7 @@ public class Modes_Activity extends AppCompatActivity {
         setContentView(R.layout.activity_modes_);
 
         Switch backgroundModeSwitch = (Switch) findViewById(R.id.BackgroundModeSwitch);
+        Switch recordDistanceSwitch = (Switch) findViewById(R.id.recordDistanceSwitch);
         backgroundModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
@@ -31,9 +32,27 @@ public class Modes_Activity extends AppCompatActivity {
                 else{
                     MainActivity.mode = "Classic";
                 }
+                Log.d(MainActivity.mode, "Mode has changed");
             }
 
         });
+
+        recordDistanceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Log.v("Switch State=", ""+isChecked);
+                if(isChecked) {
+                    MainActivity.recordDistance = true;
+                }
+                else{
+                    MainActivity.recordDistance = false;
+                }
+                Log.d(MainActivity.recordDistance.toString(), "Distance Recording has Changed");
+            }
+
+        });
+
     }
 
 

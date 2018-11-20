@@ -10,7 +10,7 @@
     <item
         android:id="@+id/Modes_Option"
         android:orderInCategory="100"
-        android:title="Modes"
+        android:title="Bonus Features"
         app:showAsAction="never" />
     <item
         android:id="@+id/Wallet_Option"

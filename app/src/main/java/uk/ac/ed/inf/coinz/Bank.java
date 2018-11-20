@@ -41,23 +41,24 @@ public class Bank {
 
     }
 
-    public void addCoinz(String currency, Double amount, String id){
-        if(currency=="SHIL"){
-            SHILs+=amount;
+    public boolean addCoinz(String currency, Double amount, String id){
+        if(numOfCoinzToday<=25) {
+            if (currency == "SHIL") {
+                SHILs += amount;
+            } else if (currency == "DOLR") {
+                DOLRs += amount;
+            } else if (currency == "QUID") {
+                QUIDs += amount;
+            } else {
+                PENYs += amount;
+            }
+            Coin c = new Coin(currency, amount, id);
+            bankCoinz.add(c);
+            numOfCoinzToday++;
+            saveBank();
+            return true;
         }
-        else if(currency=="DOLR"){
-            DOLRs+=amount;
-        }
-        else if(currency=="QUID"){
-            QUIDs+=amount;
-        }
-        else{
-            PENYs+=amount;
-        }
-        Coin c = new Coin(currency, amount, id);
-        bankCoinz.add(c);
-        numOfCoinzToday++;
-        saveBank();
+        return false;
     }
 
     public Double getCoinAmount(String currency, Double[] rates){

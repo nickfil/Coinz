@@ -47,12 +47,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationEngine locationEngine;
     private LocationLayerPlugin locationLayerPlugin;
     private Location originLocation;
+    private Location prevLocation;
+    private float[] distance;
+    private Double totalDistanceWalked;
     public TextView data;
     public static my_wallet wallet;
     public static Bank bank;
     public static HashMap<String, Double> todaysRates = new HashMap<>();
     private CollectingCoinz collectingCoinz;
     public static String mode = "Classic";
+    public static Boolean recordDistance = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,6 +178,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             collectingCoinz.checkCoinCollection(map, location, wallet);
             originLocation=location;
             setCameraPosition(location);
+
+            if(recordDistance){
+                if(prevLocation == null){
+                    prevLocation = location;
+                }
+                //add distance walked every time the location is updated
+                if(prevLocation != null){
+                    Location.distanceBetween(prevLocation.getLatitude(),
+                            prevLocation.getLongitude(),
+                            location.getLatitude(),
+                            location.getLongitude(),distance);
+
+                    totalDistanceWalked = totalDistanceWalked + distance[0];
+                }
+            }
         }
     }
 
