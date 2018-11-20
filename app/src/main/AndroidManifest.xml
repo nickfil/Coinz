@@ -30,8 +30,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
-        </activity>
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
         <activity
             android:name=".Wallet_Activity"
             android:label="Wallet"
@@ -39,6 +38,10 @@
         <activity
             android:name=".Bank_Activity"
             android:label="Bank"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+        <activity
+            android:name=".Modes_Activity"
+            android:label="Modes"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
     </application>
 

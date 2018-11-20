@@ -56,9 +56,15 @@ public class Wallet_Activity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
         switch (item.getItemId()) {
-            case R.id.Modes_Option:
+            case R.id.Main_Activity:
 
                 intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.Modes_Option:
+
+                intent = new Intent(this, Modes_Activity.class);
                 startActivity(intent);
                 return true;
 

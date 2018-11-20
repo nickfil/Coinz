@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static Bank bank;
     public static HashMap<String, Double> todaysRates = new HashMap<>();
     private CollectingCoinz collectingCoinz;
+    public static String mode = "Classic";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //extracting the properties and geometry from each feature to create markers
         FeatureCollection fc = FeatureCollection.fromJson(json);
-        collectingCoinz = new CollectingCoinz(fc);
+        collectingCoinz = new CollectingCoinz(fc,this);
         collectingCoinz.initializeMap(map, wallet);
     }
 
@@ -264,8 +265,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
         switch (item.getItemId()) {
+            case R.id.Main_Activity:
+
+                intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                return true;
+
             case R.id.Modes_Option:
                 // User chose the "Settings" item, show the app settings UI...
+                intent = new Intent(this, Modes_Activity.class);
+                startActivity(intent);
                 return true;
 
             case R.id.Wallet_Option:

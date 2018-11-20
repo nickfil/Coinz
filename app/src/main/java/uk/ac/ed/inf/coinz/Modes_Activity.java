@@ -1,51 +1,42 @@
 package uk.ac.ed.inf.coinz;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ListView;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.util.ArrayList;
-
-public class Bank_Activity extends AppCompatActivity {
-
-    ListView listView;
-    private ArrayList<String> currencies;
-    private ArrayList<String> values;
-    private ArrayList<Integer> icon;
-    private ArrayList<String> id;
+public class Modes_Activity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bank_);
-        listView = findViewById(R.id.listView);
-        Bank bank = MainActivity.bank;
+        setContentView(R.layout.activity_modes_);
 
-        currencies = new ArrayList<>();
-        values = new ArrayList<>();
-        icon = new ArrayList<>();
-        id = new ArrayList<>();
+        Switch backgroundModeSwitch = (Switch) findViewById(R.id.BackgroundModeSwitch);
+        backgroundModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
-        if(!bank.getCoinz().isEmpty()) {
-            for (Coin c : bank.getCoinz()) {
-                currencies.add(c.getCoinCurrency());
-                values.add(c.getCoinValue().toString()); //parallel arrays with each coin in wallet and its value
-                icon.add(c.getIcon());
-                id.add(c.getCoinId());
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Log.v("Switch State=", ""+isChecked);
+                if(isChecked) {
+                    MainActivity.mode = "Background";
+                }
+                else{
+                    MainActivity.mode = "Classic";
+                }
             }
 
-            ListAdapter listAdapter = new ListAdapter(Bank_Activity.this, currencies, values, icon, id,2);
-            Log.d(String.valueOf(values.size()), "Sizzzzzz");
-            listView.setAdapter(listAdapter);
-        }
+        });
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

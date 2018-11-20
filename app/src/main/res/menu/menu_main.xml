@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="uk.ac.ed.inf.coinz.MainActivity">
     <item
+        android:id="@+id/Main_Activity"
+        android:orderInCategory="100"
+        android:title="Play"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/Modes_Option"
         android:orderInCategory="100"
         android:title="Modes"
