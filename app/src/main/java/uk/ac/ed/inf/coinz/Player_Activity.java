@@ -34,6 +34,18 @@ public class Player_Activity extends AppCompatActivity {
         TextView gold = findViewById(R.id.goldAmount);
         gold.setText(String.valueOf(Math.round(bank.getCoinAmount("Gold", MainActivity.todaysRates))));
 
+        TextView shil = findViewById(R.id.shilAmount);
+        shil.setText(String.valueOf(Math.round(bank.getCoinAmount("SHIL", MainActivity.todaysRates))));
+
+        TextView dolr = findViewById(R.id.dolrAmount);
+        dolr.setText(String.valueOf(Math.round(bank.getCoinAmount("DOLR", MainActivity.todaysRates))));
+
+        TextView quid = findViewById(R.id.quidAmount);
+        quid.setText(String.valueOf(Math.round(bank.getCoinAmount("QUID", MainActivity.todaysRates))));
+
+        TextView peny = findViewById(R.id.penyAmount);
+        peny.setText(String.valueOf(Math.round(bank.getCoinAmount("PENY", MainActivity.todaysRates))));
+
     }
 
     @Override
