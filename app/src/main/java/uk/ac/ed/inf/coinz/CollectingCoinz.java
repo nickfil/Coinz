@@ -28,6 +28,10 @@ public class CollectingCoinz {
     private ArrayList<MarkerViewOptions> markers = new ArrayList<MarkerViewOptions>();
     private FeatureCollection fc;
     private Context context;
+    private Location prevLocation;
+    private Double totalDistanceWalked = SaveSharedPreference.getDistanceWalked(getApplicationContext());
+    public static Boolean recordDistance = SaveSharedPreference.getRecordDistanceSwitch(getApplicationContext());
+
 
     public CollectingCoinz(FeatureCollection fc, Context context){
         this.fc = fc;
@@ -92,6 +96,7 @@ public class CollectingCoinz {
             if (distance[0] < 25 && !wallet.contains(tempMarker.getSnippet())) {
 
                 if (MainActivity.mode.equals("Classic")) {
+
                     AlertDialog alertDialog = new AlertDialog.Builder(context).create();
                     alertDialog.setTitle("Coin Collection Available\n\n");
                     alertDialog.setMessage("Do you want to collect this coin?" + "\n\n" + tempMarker.getTitle());
@@ -134,6 +139,25 @@ public class CollectingCoinz {
                     Log.d(String.valueOf(wallet.getCoinz()), "Saved Wallet");
                     Log.d(String.valueOf(wallet.getCoinz().size()), "number of coinz");
 
+                }
+
+
+                if(recordDistance){
+                    if(prevLocation==null){
+                        prevLocation = location;
+                        Log.d("location", "location created");
+                    }
+                    //add distance walked every time the location is updated
+                    else{
+                        Location.distanceBetween(prevLocation.getLatitude(),
+                                prevLocation.getLongitude(),
+                                location.getLatitude(),
+                                location.getLongitude(), distance);
+
+                        totalDistanceWalked += distance[0];
+                        Log.d("Distance Updated", totalDistanceWalked.toString());
+                        SaveSharedPreference.setDistanceWalked(getApplicationContext(), totalDistanceWalked);
+                    }
                 }
             }
         }

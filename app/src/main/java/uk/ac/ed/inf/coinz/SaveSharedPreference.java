@@ -1,6 +1,7 @@
 package uk.ac.ed.inf.coinz;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -20,6 +21,24 @@ public class SaveSharedPreference {
     public static void setUsername(Context context, String username){
         SharedPreferences.Editor editor = getSharedPreferences(context).edit();
         editor.putString(player_username, username);
+        editor.apply();
+    }
+
+    public static void setDistanceWalked(Context context, Double distance){
+        SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+        editor.putString("DistanceWalked", String.valueOf(distance));
+        editor.apply();
+    }
+
+    public static void setBackgroundSwitch(Context context, Boolean state){
+        SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+        editor.putString("BackgroundSwitch", state.toString());
+        editor.apply();
+    }
+
+    public static void setRecordDistanceSwitch(Context context, Boolean state){
+        SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+        editor.putString("RecordDistanceSwitch", state.toString());
         editor.apply();
     }
 
@@ -47,6 +66,14 @@ public class SaveSharedPreference {
         editor.apply();
     }
 
+    public static Boolean getBackgroundSwitch(Context context){
+        return Boolean.valueOf(getSharedPreferences(context).getString("BackgroundSwitch", "false"));
+    }
+
+    public static Boolean getRecordDistanceSwitch(Context context){
+        return Boolean.valueOf(getSharedPreferences(context).getString("RecordDistanceSwitch", "false"));
+    }
+
     public static int getNumofBankedToday(Context context){
         return Integer.valueOf(getSharedPreferences(context).getString("numofBankedToday", "0"));
     }
@@ -57,6 +84,10 @@ public class SaveSharedPreference {
 
     public static String getUsername(Context context){
         return getSharedPreferences(context).getString(player_username, "");
+    }
+
+    public static Double getDistanceWalked(Context context){
+        return Double.valueOf(getSharedPreferences(context).getString("DistanceWalked", "0"));
     }
 
     public static ArrayList<Coin> getWalletCoin(Context context){
@@ -107,6 +138,7 @@ public class SaveSharedPreference {
         }
 
         for(String key : keystoRemove){
+            Log.d(key, "this key will be removed");
             getSharedPreferences(context).edit().remove(key).commit();
         }
     }

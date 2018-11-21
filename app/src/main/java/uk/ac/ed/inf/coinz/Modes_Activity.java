@@ -1,16 +1,24 @@
 package uk.ac.ed.inf.coinz;
 
 import android.content.Intent;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.webkit.SafeBrowsingResponse;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.text.CollationElementIterator;
 
 public class Modes_Activity extends AppCompatActivity {
 
@@ -21,6 +29,7 @@ public class Modes_Activity extends AppCompatActivity {
 
         Switch backgroundModeSwitch = (Switch) findViewById(R.id.BackgroundModeSwitch);
         Switch recordDistanceSwitch = (Switch) findViewById(R.id.recordDistanceSwitch);
+        backgroundModeSwitch.setChecked(SaveSharedPreference.getBackgroundSwitch(getApplicationContext()));
         backgroundModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
@@ -28,34 +37,45 @@ public class Modes_Activity extends AppCompatActivity {
                 Log.v("Switch State=", ""+isChecked);
                 if(isChecked) {
                     MainActivity.mode = "Background";
+                    SaveSharedPreference.setBackgroundSwitch(getApplicationContext(), true);
                 }
                 else{
                     MainActivity.mode = "Classic";
+                    SaveSharedPreference.setBackgroundSwitch(getApplicationContext(), false);
                 }
                 Log.d(MainActivity.mode, "Mode has changed");
             }
 
         });
 
+        recordDistanceSwitch.setChecked(SaveSharedPreference.getRecordDistanceSwitch(getApplicationContext()));
         recordDistanceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Log.v("Switch State=", ""+isChecked);
                 if(isChecked) {
-                    MainActivity.recordDistance = true;
+                    CollectingCoinz.recordDistance = true;
+                    SaveSharedPreference.setRecordDistanceSwitch(getApplicationContext(), true);
                 }
                 else{
-                    MainActivity.recordDistance = false;
+                    CollectingCoinz.recordDistance = false;
+                    SaveSharedPreference.setRecordDistanceSwitch(getApplicationContext(), false);
                 }
-                Log.d(MainActivity.recordDistance.toString(), "Distance Recording has Changed");
+                Log.d(CollectingCoinz.recordDistance.toString(), "Distance Recording has Changed");
             }
 
         });
 
+        Button setNickname = findViewById(R.id.setNickname);
+        TextInputEditText usrnm = findViewById(R.id.EditNickname);
+        setNickname.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                SaveSharedPreference.setUsername(getApplicationContext(), usrnm.getEditableText().toString());
+            }
+        });
+
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -89,6 +109,12 @@ public class Modes_Activity extends AppCompatActivity {
             case R.id.Bank_Option:
 
                 intent = new Intent(this, Bank_Activity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.Profile_Option:
+
+                intent = new Intent(this, Player_Activity.class);
                 startActivity(intent);
                 return true;
 

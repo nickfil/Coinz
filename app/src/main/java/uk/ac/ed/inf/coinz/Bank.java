@@ -61,7 +61,7 @@ public class Bank {
         return false;
     }
 
-    public Double getCoinAmount(String currency, Double[] rates){
+    public Double getCoinAmount(String currency, HashMap<String, Double>  rates){
         if(currency=="SHIL"){
             return SHILs;
         }
@@ -75,10 +75,10 @@ public class Bank {
             return PENYs;
         }
         else{
-            Double total = getCoinAmount("SHIL", rates)*rates[0]
-                    +getCoinAmount("DOLR", rates)*rates[1]
-                    +getCoinAmount("QUID", rates)*rates[2]
-                    +getCoinAmount("PENY", rates)*rates[3];
+            Double total = getCoinAmount("SHIL", rates)*rates.get("SHIL")
+                    +getCoinAmount("DOLR", rates)*rates.get("DOLR")
+                    +getCoinAmount("QUID", rates)*rates.get("QUID")
+                    +getCoinAmount("PENY", rates)*rates.get("PENY");
             return total;
         }
     }

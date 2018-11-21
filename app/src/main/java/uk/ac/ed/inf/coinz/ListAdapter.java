@@ -29,6 +29,8 @@ public class ListAdapter extends ArrayAdapter{
     private ArrayList<Integer> icon;
     private ArrayList<String> id;
     private int activity;
+    private my_wallet wallet = new my_wallet(MainActivity.todaysRates, SaveSharedPreference.getWalletCoin(getContext()));
+    private Bank bank = new Bank(MainActivity.todaysRates, SaveSharedPreference.getBankCoin(getContext()));
 
     public ListAdapter(Activity context, ArrayList<String> currencies, ArrayList<String> values, ArrayList<Integer> icon, ArrayList<String> id, int activity) {//1=wallet, 2=bank
         super(context, R.layout.list_row, currencies);
@@ -76,21 +78,22 @@ public class ListAdapter extends ArrayAdapter{
                             switch (item.getItemId()) {
 
                                 case R.id.Deposit:
-                                    if(MainActivity.bank.addCoinz(c.getCoinCurrency(), c.getCoinValue(), c.getCoinId())) {
-                                        MainActivity.wallet.Delete(c);
+                                    if(bank.addCoinz(c.getCoinCurrency(), c.getCoinValue(), c.getCoinId())) {
+                                        wallet.Delete(c);
                                         removeCoin(position);
                                         Toast.makeText(getContext(),"Coin Deposited", Toast.LENGTH_SHORT).show();
+
                                         break;
                                     }
                                     Toast.makeText(getContext(),"Bank is full for today", Toast.LENGTH_SHORT).show();
                                     break;
                                 case R.id.Send:
-                                    MainActivity.wallet.Delete(c);
+                                    wallet.Delete(c);
                                     removeCoin(position);
                                     Toast.makeText(getContext(),"Coin Sent", Toast.LENGTH_SHORT).show();
                                     break;
                                 case R.id.Delete:
-                                    MainActivity.wallet.Delete(c);
+                                    wallet.Delete(c);
                                     removeCoin(position);
                                     Toast.makeText(getContext(),"Coin Deleted", Toast.LENGTH_SHORT).show();
                                     break;

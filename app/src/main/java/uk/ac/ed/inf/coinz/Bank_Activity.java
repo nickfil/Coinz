@@ -20,13 +20,14 @@ public class Bank_Activity extends AppCompatActivity {
     private ArrayList<String> values;
     private ArrayList<Integer> icon;
     private ArrayList<String> id;
+    private Bank bank;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bank_);
         listView = findViewById(R.id.listView);
-        Bank bank = MainActivity.bank;
+        bank = new Bank(MainActivity.todaysRates, SaveSharedPreference.getBankCoin(getApplicationContext()));
 
         currencies = new ArrayList<>();
         values = new ArrayList<>();
@@ -79,6 +80,12 @@ public class Bank_Activity extends AppCompatActivity {
             case R.id.Bank_Option:
 
                 intent = new Intent(this, Bank_Activity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.Profile_Option:
+
+                intent = new Intent(this, Player_Activity.class);
                 startActivity(intent);
                 return true;
 

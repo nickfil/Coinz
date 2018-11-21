@@ -23,6 +23,11 @@
         android:title="Bank"
         app:showAsAction="never"></item>
     <item
+        android:id="@+id/Profile_Option"
+        android:orderInCategory="100"
+        android:title="Profile"
+        app:showAsAction="never"></item>
+    <item
         android:id="@+id/LogOut_Option"
         android:orderInCategory="100"
         android:title="Log Out"

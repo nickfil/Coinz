@@ -43,6 +43,10 @@
             android:name=".Modes_Activity"
             android:label="Bonus Features"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+        <activity
+            android:name=".Player_Activity"
+            android:label="Profile"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
     </application>
 
 </manifest>

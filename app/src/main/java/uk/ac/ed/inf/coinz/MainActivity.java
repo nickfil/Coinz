@@ -1,5 +1,6 @@
 package uk.ac.ed.inf.coinz;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -47,16 +48,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationEngine locationEngine;
     private LocationLayerPlugin locationLayerPlugin;
     private Location originLocation;
-    private Location prevLocation;
-    private float[] distance;
-    private Double totalDistanceWalked;
     public TextView data;
     public static my_wallet wallet;
     public static Bank bank;
     public static HashMap<String, Double> todaysRates = new HashMap<>();
     private CollectingCoinz collectingCoinz;
     public static String mode = "Classic";
-    public static Boolean recordDistance = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         enableLocation();
 
 
-        DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+        @SuppressLint("SimpleDateFormat") DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
         Date date = new Date();
         String dt = df.format(date);
         String json = "";
@@ -178,21 +175,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             collectingCoinz.checkCoinCollection(map, location, wallet);
             originLocation=location;
             setCameraPosition(location);
-
-            if(recordDistance){
-                if(prevLocation == null){
-                    prevLocation = location;
-                }
-                //add distance walked every time the location is updated
-                if(prevLocation != null){
-                    Location.distanceBetween(prevLocation.getLatitude(),
-                            prevLocation.getLongitude(),
-                            location.getLatitude(),
-                            location.getLongitude(),distance);
-
-                    totalDistanceWalked = totalDistanceWalked + distance[0];
-                }
-            }
         }
     }
 
@@ -305,6 +287,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.Bank_Option:
 
                 intent = new Intent(this, Bank_Activity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.Profile_Option:
+
+                intent = new Intent(this, Player_Activity.class);
                 startActivity(intent);
                 return true;
 

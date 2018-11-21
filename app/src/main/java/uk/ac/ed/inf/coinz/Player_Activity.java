@@ -1,49 +1,39 @@
 package uk.ac.ed.inf.coinz;
 
 import android.content.Intent;
-import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.util.ArrayList;
+public class Player_Activity extends AppCompatActivity {
 
-public class Wallet_Activity extends AppCompatActivity {
-
-    ListView listView;
-    private ArrayList<String> currencies;
-    private ArrayList<String> values;
-    private ArrayList<Integer> icon;
-    private ArrayList<String> id;
-    private my_wallet wallet;
+    private Bank bank;
+    private String username;
+    private Double distance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_wallet_);
-        listView = findViewById(R.id.listView);
-        wallet = new my_wallet(MainActivity.todaysRates, SaveSharedPreference.getWalletCoin(getApplicationContext()));
+        setContentView(R.layout.activity_player_);
+        bank = new Bank(MainActivity.todaysRates, SaveSharedPreference.getBankCoin(getApplicationContext()));
+        distance = SaveSharedPreference.getDistanceWalked(getApplicationContext());
+        username = SaveSharedPreference.getUsername(getApplicationContext());
 
-        currencies = new ArrayList<>();
-        values = new ArrayList<>();
-        icon = new ArrayList<>();
-        id = new ArrayList<>();
+        TextView name = findViewById(R.id.nameBox);
+        name.setText(username);
 
-        if(!wallet.getCoinz().isEmpty()) {
-            for (Coin c : wallet.getCoinz()) {
-                currencies.add(c.getCoinCurrency());
-                values.add(c.getCoinValue().toString()); //parallel arrays with each coin in wallet and its value
-                icon.add(c.getIcon());
-                id.add(c.getCoinId());
-            }
+        TextView dst = findViewById(R.id.distanceTextBox);
+        dst.setText(String.valueOf(Math.round(distance))+"m");
 
-            ListAdapter listAdapter = new ListAdapter(Wallet_Activity.this, currencies, values, icon, id,1);
-            listView.setAdapter(listAdapter);
-        }
+        TextView gold = findViewById(R.id.goldAmount);
+        gold.setText(String.valueOf(Math.round(bank.getCoinAmount("Gold", MainActivity.todaysRates))));
+
     }
 
     @Override
@@ -64,7 +54,7 @@ public class Wallet_Activity extends AppCompatActivity {
                 return true;
 
             case R.id.Modes_Option:
-
+                // User chose the "Settings" item, show the app settings UI...
                 intent = new Intent(this, Modes_Activity.class);
                 startActivity(intent);
                 return true;

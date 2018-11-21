@@ -1,5 +1,7 @@
 package uk.ac.ed.inf.coinz;
 
+import android.util.Log;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -105,10 +107,12 @@ public class my_wallet{
         dt = df.format(date);
 
         SaveSharedPreference.lastSaveDate(getApplicationContext(), dt);
+        SaveSharedPreference.wipeWallet(getApplicationContext());
 
         String cn;
         int i=0;
         for(Coin c : walletCoinz){
+            Log.d("walletcoin"+":"+String.valueOf(i), "this key will be added now");
             cn = c.getCoinCurrency()+":"+c.getCoinValue()+":"+c.getCoinId();
             SaveSharedPreference.setWalletCoin(getApplicationContext(), "walletcoin"+":"+String.valueOf(i), cn);
             i++;
@@ -125,7 +129,7 @@ public class my_wallet{
     }
 
     public void Delete(Coin c){
-        if(c.getCoinCurrency().equals("SHIL")){                                        //and then add it to the relevant sub wallet
+        if(c.getCoinCurrency().equals("SHIL")){
             SHILs-=c.getCoinValue();
         }
         else if(c.getCoinCurrency().equals("DOLR")){
@@ -137,7 +141,18 @@ public class my_wallet{
         else{
             PENYs-=c.getCoinValue();
         }
-        walletCoinz.remove(c);
+
+        Log.d(String.valueOf(walletCoinz.size()), "Size of wallet before");
+
+        for(Coin coin : walletCoinz){
+            if(coin.getCoinId().equals(c.getCoinId()));
+            walletCoinz.remove(coin);
+            break;
+        }
+
+        Log.d(String.valueOf(walletCoinz.size()), "Size of wallet after");
         saveWallet();
+
+
     }
 }
