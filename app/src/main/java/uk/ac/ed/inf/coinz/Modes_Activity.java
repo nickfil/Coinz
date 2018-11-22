@@ -112,6 +112,12 @@ public class Modes_Activity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
 
+            case R.id.Chat_Option:
+
+                intent = new Intent(this, KommunicatorActivity.class);
+                startActivity(intent);
+                return true;
+
             case R.id.Profile_Option:
 
                 intent = new Intent(this, Player_Activity.class);

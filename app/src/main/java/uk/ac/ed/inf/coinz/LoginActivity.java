@@ -37,9 +37,16 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -72,6 +79,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mLoginFormView;
     private FirebaseAuth mAuth;
 
+    private static final String COLLECTION_KEY = "Users ";
+
+    private FirebaseFirestore firestore;
+    public DocumentReference firestore_user;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +93,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
         mAuth = FirebaseAuth.getInstance();
+
+
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -97,7 +112,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onClick(View view) {
                 attemptLogin("signin");
-                //signIn(mEmailView.getText().toString(), mPasswordView.getText().toString());
+
             }
         });
 
@@ -106,7 +121,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onClick(View view) {
                 attemptLogin("register");
-                //CreateAccount(mEmailView.getText().toString(), mPasswordView.getText().toString());
+
             }
         });
 
@@ -127,6 +142,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                             FirebaseUser user = mAuth.getCurrentUser();
+
+                            Map<String, Object> eml = new HashMap<>();
+                            eml.put("email", email);
+                            firestore = FirebaseFirestore.getInstance();
+                            firestore_user = firestore.collection(COLLECTION_KEY)
+                                                        .document(user.getUid());
+                            firestore_user.set(eml);
+                            //firestore_user.set(new my_wallet());
+
+
                             updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -136,7 +161,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             updateUI(null);
                         }
 
-                        // ...
+
                     }
                 });
     }
@@ -150,6 +175,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("", "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+
+                            firestore = FirebaseFirestore.getInstance();
+                            firestore_user = firestore.collection(COLLECTION_KEY)
+                                    .document(user.getUid());
+
                             updateUI(user);
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);

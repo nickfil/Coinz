@@ -47,6 +47,10 @@
             android:name=".Player_Activity"
             android:label="Profile"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+        <activity
+            android:name=".KommunicatorActivity"
+            android:label="Chat"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
     </application>
 
 </manifest>
