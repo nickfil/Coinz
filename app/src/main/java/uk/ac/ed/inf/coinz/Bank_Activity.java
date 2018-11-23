@@ -49,7 +49,6 @@ public class Bank_Activity extends AppCompatActivity {
                     public Task<List<QuerySnapshot>> then(@NonNull Task<QuerySnapshot> task) {
                         List<Task<QuerySnapshot>> tasks = new ArrayList<Task<QuerySnapshot>>();
                         for (DocumentSnapshot ds : task.getResult()) {
-                            Log.d(String.valueOf(ds.get("coinId")), "yoooooooooo");
                             Coin c = new Coin((String) ds.get("coinCurrency"),
                                               (Double) ds.get("coinValue"),
                                               (String) ds.get("coinId"));

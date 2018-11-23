@@ -2,6 +2,7 @@ package uk.ac.ed.inf.coinz;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +13,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,6 +25,7 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -41,6 +45,7 @@ public class ListAdapter extends ArrayAdapter{
     private my_wallet wallet;
     private Bank bank;
     private String coinToRemove;
+
 
 
     public ListAdapter(Activity context, ArrayList<String> currencies, ArrayList<String> values, ArrayList<Integer> icon, ArrayList<String> id, int activity) {//1=wallet, 2=bank
@@ -116,11 +121,58 @@ public class ListAdapter extends ArrayAdapter{
                                     break;
                                 case R.id.Send:
                                     /////////////////////////////////////////////////////////implement
-                                    wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
-                                    wallet.Delete(c);
-                                    removeCoin(position);
-                                    Toast.makeText(getContext(),"Coin Sent", Toast.LENGTH_SHORT).show();
+                                    AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+                                    alertDialog.setTitle("Send Coin\n\n");
+                                    alertDialog.setMessage("Enter email:");
+                                    final EditText input = new EditText(context);
+                                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                                            LinearLayout.LayoutParams.MATCH_PARENT,
+                                            LinearLayout.LayoutParams.MATCH_PARENT);
+                                    input.setLayoutParams(lp);
+                                    alertDialog.setView(input);
+                                    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Send",
+                                            (dialog, i) -> {
+
+
+                                                LoginActivity.firestore.collection("Users ").get()
+                                                        .continueWithTask(new Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>() {
+                                                            @Override
+                                                            public Task<List<QuerySnapshot>> then(@NonNull Task<QuerySnapshot> task) {
+                                                                List<Task<QuerySnapshot>> tasks = new ArrayList<Task<QuerySnapshot>>();
+                                                                Boolean flag=false;
+                                                                for (DocumentSnapshot ds : task.getResult()) {
+                                                                    Log.d(String.valueOf(ds.getData().get("email")), "UID here");
+
+                                                                    if(ds.getData().get("email").equals(input.getText().toString())){
+                                                                        Log.d(ds.getId(),"UID here");
+                                                                        String UID = ds.getId();
+                                                                        SaveSharedPreference.setUIDtoSend(getContext(), UID);
+
+                                                                        LoginActivity.firestore.collection("Users ").document(UID).collection("Bank").document(c.getCoinId()).set(c);
+                                                                        wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
+                                                                        wallet.Delete(c);
+                                                                        removeCoin(position);
+                                                                        flag=true;
+                                                                        Toast.makeText(getContext(), "Coin Sent", Toast.LENGTH_SHORT).show();
+                                                                        notifyDataSetChanged();
+
+                                                                    }
+                                                                }
+                                                                if(flag.equals(false)){
+                                                                    SaveSharedPreference.setUIDtoSend(getContext(), "");
+                                                                    Toast.makeText(getContext(), "Coin Was Not Sent", Toast.LENGTH_SHORT).show();
+                                                                }
+
+                                                                return Tasks.whenAllSuccess(tasks);
+                                                            }
+                                                        });
+
+                                                dialog.dismiss();
+                                            });
+                                    alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", (dialog, i) -> dialog.dismiss());
+                                    alertDialog.show();
                                     break;
+
                                 case R.id.Delete:
                                     wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
                                     wallet.Delete(c);

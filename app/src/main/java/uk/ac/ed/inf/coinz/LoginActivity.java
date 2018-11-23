@@ -87,7 +87,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private static final String COLLECTION_KEY = "Users ";
 
-    private FirebaseFirestore firestore;
+    public static FirebaseFirestore firestore;
     public static DocumentReference firestore_user;
     public static CollectionReference firestore_bank;
     public static CollectionReference firestore_wallet;

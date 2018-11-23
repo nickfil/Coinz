@@ -16,8 +16,18 @@ public class SaveSharedPreference {
         editor.apply();
     }
 
+    public static void setUIDtoSend(Context context, String UID){
+        SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+        editor.putString("UID", UID);
+        editor.apply();
+    }
+
+    public static String getUIDtoSend(Context context){
+        return getSharedPreferences(context).getString("UID", "");
+    }
+
     public static String getLastSaveDate(Context context){
-        return getSharedPreferences(context).getString("date", "");
+        return getSharedPreferences(context).getString("DateToday", "");
     }
 
     public static void setNumofBankedToday(Context context, int num){
