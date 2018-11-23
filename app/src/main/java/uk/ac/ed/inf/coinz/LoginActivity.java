@@ -2,6 +2,7 @@ package uk.ac.ed.inf.coinz;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -39,11 +40,16 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +88,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final String COLLECTION_KEY = "Users ";
 
     private FirebaseFirestore firestore;
-    public DocumentReference firestore_user;
+    public static DocumentReference firestore_user;
+    public static CollectionReference firestore_bank;
+    public static CollectionReference firestore_wallet;
+
+    private ArrayList<Coin> walletCoinz = new ArrayList<>();
+    private ArrayList<Coin> bankCoinz = new ArrayList<>();
+
+    //default things everyone has
+    private Bank bank = new Bank(MainActivity.todaysRates, bankCoinz);
+    private my_wallet wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
+    private int numOfCoinzToday;
+    private Double totalDistanceWalked;
+    private String nickname;
+    private Boolean distanceSwitch;
+    private Boolean backgroundSwitch;
 
 
     @Override
@@ -141,15 +161,41 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                     Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
+
                             FirebaseUser user = mAuth.getCurrentUser();
 
-                            Map<String, Object> eml = new HashMap<>();
-                            eml.put("email", email);
+                            Map<String, Object> initializingMap = new HashMap<>(); //initializing a map with all the default elements every user has
+                            initializingMap.put("email", email);
+
+                            numOfCoinzToday = 0;
+                            initializingMap.put("numOfCoinzToday", numOfCoinzToday);
+
+                            totalDistanceWalked = 0.0;
+                            initializingMap.put("totalDistanceWalked", totalDistanceWalked);
+
+                            nickname = "";
+                            initializingMap.put("nickname", nickname);
+
+                            distanceSwitch = true;
+                            initializingMap.put("distanceSwitch", distanceSwitch);
+
+                            backgroundSwitch = false;
+                            initializingMap.put("backgroundSwitch", backgroundSwitch);
+
+                            @SuppressLint("SimpleDateFormat") DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+                            Date date = new Date();
+                            String dt = df.format(date);
+                            initializingMap.put("lastEntryDate", dt);
+
                             firestore = FirebaseFirestore.getInstance();
+
                             firestore_user = firestore.collection(COLLECTION_KEY)
                                                         .document(user.getUid());
-                            firestore_user.set(eml);
-                            //firestore_user.set(new my_wallet());
+                            firestore_user.set(initializingMap);
+
+                            firestore_bank = firestore_user.collection("Bank");
+
+                            firestore_wallet = firestore_user.collection("Wallet");
 
 
                             updateUI(user);
@@ -179,6 +225,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             firestore = FirebaseFirestore.getInstance();
                             firestore_user = firestore.collection(COLLECTION_KEY)
                                     .document(user.getUid());
+
+                            firestore_bank = firestore_user.collection("Bank");
+
+                            firestore_wallet = firestore_user.collection("Wallet");
+
 
                             updateUI(user);
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);

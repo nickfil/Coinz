@@ -56,7 +56,7 @@ public class KommunicatorActivity extends AppCompatActivity {
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setTimestampsInSnapshotsEnabled(true)
                 .build();
-        firestore.setFirestoreSettings(settings);
+
         firestoreChat =
                 firestore.collection(COLLECTION_KEY) // ”Chat”
                          .document(DOCUMENT_KEY); // ”Message”
@@ -108,7 +108,7 @@ public class KommunicatorActivity extends AppCompatActivity {
                 return true;
 
             case R.id.Modes_Option:
-                // User chose the "Settings" item, show the app settings UI...
+
                 intent = new Intent(this, Modes_Activity.class);
                 startActivity(intent);
                 return true;
@@ -128,6 +128,12 @@ public class KommunicatorActivity extends AppCompatActivity {
             case R.id.Chat_Option:
 
                 intent = new Intent(this, KommunicatorActivity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.Rates_Option:
+
+                intent = new Intent(this, Rates_Activity.class);
                 startActivity(intent);
                 return true;
 

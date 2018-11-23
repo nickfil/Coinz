@@ -1,12 +1,20 @@
 package uk.ac.ed.inf.coinz;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
+
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
@@ -18,7 +26,6 @@ public class my_wallet{
     private Double PENYs;
     private HashMap<String, Double> rates;
     private ArrayList<Coin> walletCoinz;
-    private String dt;
 
     public my_wallet(HashMap<String,Double> rates, ArrayList<Coin> walletCoinz){
         this.rates = rates;
@@ -63,28 +70,27 @@ public class my_wallet{
         else{
             PENYs+=amount;
         }
-        Coin thisCoin = new Coin(currency, amount, id);
-        walletCoinz.add(thisCoin);
+
+        Coin c = new Coin(currency, amount, id);
+        walletCoinz.add(c);
+        LoginActivity.firestore_wallet.document(c.getCoinId()).set(c);
     }
 
     public Double getCoinAmount(String currency){
-        if(currency.equals("SHIL")){
-            return SHILs;
-        }
-        else if(currency.equals("DOLR")){
-            return DOLRs;
-        }
-        else if(currency.equals("QUID")){
-            return QUIDs;
-        }
-        else if(currency.equals("PENY")){
-            return PENYs;
-        }
-        else{
-            return getCoinAmount("SHIL")*rates.get("SHIL")
-                          +getCoinAmount("DOLR")*rates.get("DOLR")
-                          +getCoinAmount("QUID")*rates.get("QUID")
-                          +getCoinAmount("PENY")*rates.get("PENY");
+        switch (currency) {
+            case "SHIL":
+                return SHILs;
+            case "DOLR":
+                return DOLRs;
+            case "QUID":
+                return QUIDs;
+            case "PENY":
+                return PENYs;
+            default:
+                return getCoinAmount("SHIL") * rates.get("SHIL")
+                        + getCoinAmount("DOLR") * rates.get("DOLR")
+                        + getCoinAmount("QUID") * rates.get("QUID")
+                        + getCoinAmount("PENY") * rates.get("PENY");
         }
     }
 
@@ -93,30 +99,16 @@ public class my_wallet{
         DOLRs=0.0;
         QUIDs=0.0;
         PENYs=0.0;
+
+        for(Coin coin : walletCoinz){
+            LoginActivity.firestore_wallet.document(coin.getCoinId()).delete();
+        }
         walletCoinz.clear();
-        SaveSharedPreference.wipeWallet(getApplicationContext());
+
     }
 
     public ArrayList<Coin> getCoinz(){
         return walletCoinz;
-    }
-
-    public void saveWallet(){
-        DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
-        Date date = new Date();
-        dt = df.format(date);
-
-        SaveSharedPreference.lastSaveDate(getApplicationContext(), dt);
-        SaveSharedPreference.wipeWallet(getApplicationContext());
-
-        String cn;
-        int i=0;
-        for(Coin c : walletCoinz){
-            Log.d("walletcoin"+":"+String.valueOf(i), "this key will be added now");
-            cn = c.getCoinCurrency()+":"+c.getCoinValue()+":"+c.getCoinId();
-            SaveSharedPreference.setWalletCoin(getApplicationContext(), "walletcoin"+":"+String.valueOf(i), cn);
-            i++;
-        }
     }
 
     public Boolean contains(String id){
@@ -129,30 +121,21 @@ public class my_wallet{
     }
 
     public void Delete(Coin c){
-        if(c.getCoinCurrency().equals("SHIL")){
-            SHILs-=c.getCoinValue();
-        }
-        else if(c.getCoinCurrency().equals("DOLR")){
-            DOLRs-=c.getCoinValue();
-        }
-        else if(c.getCoinCurrency().equals("QUID")){
-            QUIDs-=c.getCoinValue();
-        }
-        else{
-            PENYs-=c.getCoinValue();
-        }
-
-        Log.d(String.valueOf(walletCoinz.size()), "Size of wallet before");
-
-        for(Coin coin : walletCoinz){
-            if(coin.getCoinId().equals(c.getCoinId()));
-            walletCoinz.remove(coin);
-            break;
+        switch (c.getCoinCurrency()) {
+            case "SHIL":
+                SHILs -= c.getCoinValue();
+                break;
+            case "DOLR":
+                DOLRs -= c.getCoinValue();
+                break;
+            case "QUID":
+                QUIDs -= c.getCoinValue();
+                break;
+            default:
+                PENYs -= c.getCoinValue();
+                break;
         }
 
-        Log.d(String.valueOf(walletCoinz.size()), "Size of wallet after");
-        saveWallet();
-
-
+        LoginActivity.firestore_wallet.document(c.getCoinId()).delete();
     }
 }

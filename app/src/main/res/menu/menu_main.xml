@@ -33,6 +33,11 @@
         android:title="Profile"
         app:showAsAction="never"></item>
     <item
+        android:id="@+id/Rates_Option"
+        android:orderInCategory="100"
+        android:title="Rates"
+        app:showAsAction="never"></item>
+    <item
         android:id="@+id/LogOut_Option"
         android:orderInCategory="100"
         android:title="Log Out"

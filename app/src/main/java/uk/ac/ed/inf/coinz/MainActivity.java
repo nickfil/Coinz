@@ -12,7 +12,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mapbox.android.core.location.LocationEngine;
@@ -34,6 +39,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Location originLocation;
     public TextView data;
     public static my_wallet wallet;
-    public static Bank bank;
+    private ArrayList<Coin> walletCoinz = new ArrayList<>();
     public static HashMap<String, Double> todaysRates = new HashMap<>();
     private CollectingCoinz collectingCoinz;
     public static String mode = "Classic";
@@ -99,16 +105,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         todaysRates.put("PENY", Double.valueOf(rates.get("PENY").toString()));
 
 
-        wallet = new my_wallet(todaysRates, SaveSharedPreference.getWalletCoin(getApplicationContext()));
-        bank = new Bank(todaysRates,SaveSharedPreference.getBankCoin(getApplicationContext()));
 
         //if the date today is different than the last save, then the wallet is wiped clean since coinz have expired
+        LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
+            if (e != null) {
+                Log.e("num of coinz", e.getMessage());
+            } else if (documentSnapshot != null && documentSnapshot.exists()) {
+                String lastEntryDate = (String) (documentSnapshot.getData().get("lastEntryDate"));
+                //saving the last entry date to shared preferences to perform check later
+                SaveSharedPreference.setDate(getApplicationContext(), lastEntryDate);
+            }
+        });
+
         if(!SaveSharedPreference.getLastSaveDate(getApplicationContext()).equals(dt)) {
 
-            Log.d(SaveSharedPreference.getLastSaveDate(getApplicationContext()),"date 1");
-            Log.d(dt, "date 2");
-
-            SaveSharedPreference.setNumofBankedToday(getApplicationContext(), 0);
+            LoginActivity.firestore_user.update("numOfCoinzToday", 0);
+            LoginActivity.firestore_user.update("lastEntryDate", dt);
+            wallet = new my_wallet(todaysRates, walletCoinz);
             wallet.wipeWallet();
 
         }
@@ -116,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //extracting the properties and geometry from each feature to create markers
         FeatureCollection fc = FeatureCollection.fromJson(json);
         collectingCoinz = new CollectingCoinz(fc,this);
-        collectingCoinz.initializeMap(map, wallet);
+        collectingCoinz.initializeMap(map);
     }
 
     private void enableLocation(){
@@ -172,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onLocationChanged(Location location) {
         if(location!=null){
-            collectingCoinz.checkCoinCollection(map, location, wallet);
+            collectingCoinz.checkCoinCollection(map, location);
             originLocation=location;
             setCameraPosition(location);
         }
@@ -273,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
 
             case R.id.Modes_Option:
-                // User chose the "Settings" item, show the app settings UI...
+
                 intent = new Intent(this, Modes_Activity.class);
                 startActivity(intent);
                 return true;
@@ -293,6 +306,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.Chat_Option:
 
                 intent = new Intent(this, KommunicatorActivity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.Rates_Option:
+
+                intent = new Intent(this, Rates_Activity.class);
                 startActivity(intent);
                 return true;
 

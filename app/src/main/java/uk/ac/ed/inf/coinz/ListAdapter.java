@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -17,8 +18,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.stats.WakeLockEvent;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ListAdapter extends ArrayAdapter{
 
@@ -28,9 +35,13 @@ public class ListAdapter extends ArrayAdapter{
     private ArrayList<String> values;
     private ArrayList<Integer> icon;
     private ArrayList<String> id;
+    private ArrayList<Coin> bankCoinz;
+    private ArrayList<Coin> walletCoinz = new ArrayList<>();
     private int activity;
-    private my_wallet wallet = new my_wallet(MainActivity.todaysRates, SaveSharedPreference.getWalletCoin(getContext()));
-    private Bank bank = new Bank(MainActivity.todaysRates, SaveSharedPreference.getBankCoin(getContext()));
+    private my_wallet wallet;
+    private Bank bank;
+    private String coinToRemove;
+
 
     public ListAdapter(Activity context, ArrayList<String> currencies, ArrayList<String> values, ArrayList<Integer> icon, ArrayList<String> id, int activity) {//1=wallet, 2=bank
         super(context, R.layout.list_row, currencies);
@@ -40,6 +51,7 @@ public class ListAdapter extends ArrayAdapter{
         this.icon = icon;
         this.id = id;
         this.activity= activity;
+
     }
 
     @Override
@@ -78,21 +90,39 @@ public class ListAdapter extends ArrayAdapter{
                             switch (item.getItemId()) {
 
                                 case R.id.Deposit:
-                                    if(bank.addCoinz(c.getCoinCurrency(), c.getCoinValue(), c.getCoinId())) {
+
+                                    LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
+                                        if (e != null) {
+                                            Log.e("num of coinz", e.getMessage());
+                                        } else if (documentSnapshot != null && documentSnapshot.exists()) {
+                                            int numOfCoinzToday = ((Long) (documentSnapshot.getData().get("numOfCoinzToday"))).intValue();
+                                            SaveSharedPreference.setNumofBankedToday(context, numOfCoinzToday);
+                                            //keeping the number of banked coins in shared preferences to have it when the task ends
+                                        }
+                                    });
+
+                                    int num = SaveSharedPreference.getNumofBankedToday(context);
+                                    if(num<25){
+                                        Log.d(String.valueOf(num), "Checking if SharedPreferencesWork");
+                                        num++;
+                                        wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
                                         wallet.Delete(c);
                                         removeCoin(position);
+                                        LoginActivity.firestore_bank.document(c.getCoinId()).set(c);
+                                        LoginActivity.firestore_user.update("numOfCoinzToday", num);
                                         Toast.makeText(getContext(),"Coin Deposited", Toast.LENGTH_SHORT).show();
-
-                                        break;
                                     }
-                                    Toast.makeText(getContext(),"Bank is full for today", Toast.LENGTH_SHORT).show();
+
                                     break;
                                 case R.id.Send:
+                                    /////////////////////////////////////////////////////////implement
+                                    wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
                                     wallet.Delete(c);
                                     removeCoin(position);
                                     Toast.makeText(getContext(),"Coin Sent", Toast.LENGTH_SHORT).show();
                                     break;
                                 case R.id.Delete:
+                                    wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
                                     wallet.Delete(c);
                                     removeCoin(position);
                                     Toast.makeText(getContext(),"Coin Deleted", Toast.LENGTH_SHORT).show();
