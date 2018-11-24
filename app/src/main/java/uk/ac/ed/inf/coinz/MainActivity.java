@@ -121,8 +121,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             LoginActivity.firestore_user.update("numOfCoinzToday", 0);
             LoginActivity.firestore_user.update("lastEntryDate", dt);
-            wallet = new my_wallet(todaysRates, walletCoinz);
-            wallet.wipeWallet();
+            //wallet = new my_wallet(todaysRates, walletCoinz);
+            //wallet.wipeWallet();
+            LoginActivity.firestore_wallet.get()
+                    .continueWithTask(new Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>() {
+                        @Override
+                        public Task<List<QuerySnapshot>> then(@NonNull Task<QuerySnapshot> task) {
+                            List<Task<QuerySnapshot>> tasks = new ArrayList<Task<QuerySnapshot>>();
+                            for (DocumentSnapshot ds : task.getResult()) {
+                                Coin c = new Coin((String) ds.get("coinCurrency"),
+                                        (Double) ds.get("coinValue"),
+                                        (String) ds.get("coinId"));
+                                walletCoinz.add(c);
+                            }
+
+                            wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
+
+                            for(Coin c : walletCoinz){
+                                LoginActivity.firestore_wallet.document(c.getCoinId()).delete();
+                            }
+
+                            return Tasks.whenAllSuccess(tasks);
+                        }
+                    });
 
         }
 

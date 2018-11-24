@@ -94,19 +94,6 @@ public class my_wallet{
         }
     }
 
-    public void wipeWallet(){
-        SHILs=0.0;
-        DOLRs=0.0;
-        QUIDs=0.0;
-        PENYs=0.0;
-
-        for(Coin coin : walletCoinz){
-            LoginActivity.firestore_wallet.document(coin.getCoinId()).delete();
-        }
-        walletCoinz.clear();
-
-    }
-
     public ArrayList<Coin> getCoinz(){
         return walletCoinz;
     }
