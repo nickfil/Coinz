@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 
@@ -111,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (e != null) {
                 Log.e("num of coinz", e.getMessage());
             } else if (documentSnapshot != null && documentSnapshot.exists()) {
-                String lastEntryDate = (String) (documentSnapshot.getData().get("lastEntryDate"));
+                String lastEntryDate = (String) (Objects.requireNonNull(documentSnapshot.getData()).get("lastEntryDate"));
                 //saving the last entry date to shared preferences to perform check later
                 SaveSharedPreference.setDate(getApplicationContext(), lastEntryDate);
             }
@@ -121,30 +122,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             LoginActivity.firestore_user.update("numOfCoinzToday", 0);
             LoginActivity.firestore_user.update("lastEntryDate", dt);
-            //wallet = new my_wallet(todaysRates, walletCoinz);
-            //wallet.wipeWallet();
             LoginActivity.firestore_wallet.get()
-                    .continueWithTask(new Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>() {
-                        @Override
-                        public Task<List<QuerySnapshot>> then(@NonNull Task<QuerySnapshot> task) {
-                            List<Task<QuerySnapshot>> tasks = new ArrayList<Task<QuerySnapshot>>();
-                            for (DocumentSnapshot ds : task.getResult()) {
-                                Coin c = new Coin((String) ds.get("coinCurrency"),
-                                        (Double) ds.get("coinValue"),
-                                        (String) ds.get("coinId"));
-                                walletCoinz.add(c);
-                            }
-
-                            wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
-
-                            for(Coin c : walletCoinz){
-                                LoginActivity.firestore_wallet.document(c.getCoinId()).delete();
-                            }
-
-                            return Tasks.whenAllSuccess(tasks);
+                    .continueWithTask((Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>) task -> {
+                        List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+                        for (DocumentSnapshot ds : Objects.requireNonNull(task.getResult())) {
+                            Coin c = new Coin((String) ds.get("coinCurrency"),
+                                    (Double) ds.get("coinValue"),
+                                    (String) ds.get("coinId"));
+                            walletCoinz.add(c);
                         }
-                    });
 
+                        wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
+
+                        for(Coin c : walletCoinz){
+                            LoginActivity.firestore_wallet.document(c.getCoinId()).delete();
+                        }
+
+                        return Tasks.whenAllSuccess(tasks);
+                    });
+        SaveSharedPreference.setNumofBankedToday(getApplicationContext(),0 ,LoginActivity.mEmailView.toString());
+        LoginActivity.firestore_user.update("numOfCoinzToday", 25);
         }
 
         //extracting the properties and geometry from each feature to create markers

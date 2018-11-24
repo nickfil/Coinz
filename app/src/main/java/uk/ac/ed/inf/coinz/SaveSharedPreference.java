@@ -22,22 +22,18 @@ public class SaveSharedPreference {
         editor.apply();
     }
 
-    public static String getUIDtoSend(Context context){
-        return getSharedPreferences(context).getString("UID", "");
-    }
-
     public static String getLastSaveDate(Context context){
         return getSharedPreferences(context).getString("DateToday", "");
     }
 
-    public static void setNumofBankedToday(Context context, int num){
+    public static void setNumofBankedToday(Context context, int num, String email){
         SharedPreferences.Editor editor = getSharedPreferences(context).edit();
-        editor.putString("numofBankedToday", String.valueOf(num));
+        editor.putString(email+":"+"numofBankedToday", String.valueOf(num));
         editor.apply();
     }
 
-    public static int getNumofBankedToday(Context context){
-        return Integer.valueOf(getSharedPreferences(context).getString("numofBankedToday", "0"));
+    public static String getNumofBankedToday(Context context, String email){
+        return getSharedPreferences(context).getString(email+":"+"numofBankedToday", "0");
     }
 
 

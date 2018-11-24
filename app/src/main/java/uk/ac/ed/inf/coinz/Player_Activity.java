@@ -1,8 +1,6 @@
 package uk.ac.ed.inf.coinz;
 
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,6 +18,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Player_Activity extends AppCompatActivity {
 
@@ -39,7 +38,7 @@ public class Player_Activity extends AppCompatActivity {
             if (e != null) {
                 Log.e("num of coinz", e.getMessage());
             } else if (documentSnapshot != null && documentSnapshot.exists()) {
-                distance = (Double) (documentSnapshot.getData().get("totalDistanceWalked"));
+                distance = (Double) (Objects.requireNonNull(documentSnapshot.getData()).get("totalDistanceWalked"));
                 Log.d(String.valueOf(distance), "fetched correctly");
 
                 TextView dst = findViewById(R.id.distanceTextBox);
@@ -51,7 +50,7 @@ public class Player_Activity extends AppCompatActivity {
             if (e != null) {
                 Log.e("num of coinz", e.getMessage());
             } else if (documentSnapshot != null && documentSnapshot.exists()) {
-                username = (String) (documentSnapshot.getData().get("nickname"));
+                username = (String) (Objects.requireNonNull(documentSnapshot.getData()).get("nickname"));
                 Log.d(String.valueOf(username), "fetched correctly");
 
                 TextView name = findViewById(R.id.nameBox);
@@ -60,39 +59,36 @@ public class Player_Activity extends AppCompatActivity {
         });
 
         LoginActivity.firestore_bank.get()
-                .continueWithTask(new Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>() {
-                    @Override
-                    public Task<List<QuerySnapshot>> then(@NonNull Task<QuerySnapshot> task) {
-                        List<Task<QuerySnapshot>> tasks = new ArrayList<Task<QuerySnapshot>>();
-                        for (DocumentSnapshot ds : task.getResult()) {
-                            Log.d(String.valueOf(ds.get("coinId")), "yoooooooooo");
-                            Coin c = new Coin((String) ds.get("coinCurrency"),
-                                    (Double) ds.get("coinValue"),
-                                    (String) ds.get("coinId"));
-                            bankCoinz.add(c);
+                .continueWithTask((Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>) task -> {
+                    List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+                    for (DocumentSnapshot ds : Objects.requireNonNull(task.getResult())) {
+                        Log.d(String.valueOf(ds.get("coinId")), "yoooooooooo");
+                        Coin c = new Coin((String) ds.get("coinCurrency"),
+                                (Double) ds.get("coinValue"),
+                                (String) ds.get("coinId"));
+                        bankCoinz.add(c);
 
-                        }
-
-                        bank = new Bank(MainActivity.todaysRates, bankCoinz);
-
-                        TextView gold = findViewById(R.id.goldAmount);
-                        gold.setText(String.valueOf(Math.round(bank.getCoinAmount("Gold", MainActivity.todaysRates))));
-
-                        TextView shil = findViewById(R.id.shilAmount);
-                        shil.setText(String.valueOf(Math.round(bank.getCoinAmount("SHIL", MainActivity.todaysRates))));
-
-                        TextView dolr = findViewById(R.id.dolrAmount);
-                        dolr.setText(String.valueOf(Math.round(bank.getCoinAmount("DOLR", MainActivity.todaysRates))));
-
-                        TextView quid = findViewById(R.id.quidAmount);
-                        quid.setText(String.valueOf(Math.round(bank.getCoinAmount("QUID", MainActivity.todaysRates))));
-
-                        TextView peny = findViewById(R.id.penyAmount);
-                        peny.setText(String.valueOf(Math.round(bank.getCoinAmount("PENY", MainActivity.todaysRates))));
-
-
-                        return Tasks.whenAllSuccess(tasks);
                     }
+
+                    bank = new Bank(MainActivity.todaysRates, bankCoinz);
+
+                    TextView gold = findViewById(R.id.goldAmount);
+                    gold.setText(String.valueOf(Math.round(bank.getCoinAmount("Gold", MainActivity.todaysRates))));
+
+                    TextView shil = findViewById(R.id.shilAmount);
+                    shil.setText(String.valueOf(Math.round(bank.getCoinAmount("SHIL", MainActivity.todaysRates))));
+
+                    TextView dolr = findViewById(R.id.dolrAmount);
+                    dolr.setText(String.valueOf(Math.round(bank.getCoinAmount("DOLR", MainActivity.todaysRates))));
+
+                    TextView quid = findViewById(R.id.quidAmount);
+                    quid.setText(String.valueOf(Math.round(bank.getCoinAmount("QUID", MainActivity.todaysRates))));
+
+                    TextView peny = findViewById(R.id.penyAmount);
+                    peny.setText(String.valueOf(Math.round(bank.getCoinAmount("PENY", MainActivity.todaysRates))));
+
+
+                    return Tasks.whenAllSuccess(tasks);
                 });
 
     }

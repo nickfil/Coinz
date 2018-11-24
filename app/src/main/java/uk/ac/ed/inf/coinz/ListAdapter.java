@@ -7,6 +7,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -24,8 +25,11 @@ import com.google.android.gms.common.stats.WakeLockEvent;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -96,31 +100,25 @@ public class ListAdapter extends ArrayAdapter{
 
                                 case R.id.Deposit:
 
-                                    LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
-                                        if (e != null) {
-                                            Log.e("num of coinz", e.getMessage());
-                                        } else if (documentSnapshot != null && documentSnapshot.exists()) {
-                                            int numOfCoinzToday = ((Long) (documentSnapshot.getData().get("numOfCoinzToday"))).intValue();
-                                            SaveSharedPreference.setNumofBankedToday(context, numOfCoinzToday);
-                                            //keeping the number of banked coins in shared preferences to have it when the task ends
-                                        }
-                                    });
-
-                                    int num = SaveSharedPreference.getNumofBankedToday(context);
-                                    if(num<25){
-                                        Log.d(String.valueOf(num), "Checking if SharedPreferencesWork");
-                                        num++;
+                                    String numOfCoinzTodayPlayer = SaveSharedPreference.getNumofBankedToday(getContext(), LoginActivity.mEmailView.toString());
+                                    Log.d(numOfCoinzTodayPlayer, "heyyyyyyy");
+                                    int numOfCoinzToday = Integer.valueOf(numOfCoinzTodayPlayer);
+                                    //keeping the number of banked coins in shared preferences to have it when the task ends
+                                    if(numOfCoinzToday<25) {
+                                        numOfCoinzToday++;
                                         wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
                                         wallet.Delete(c);
-                                        removeCoin(position);
                                         LoginActivity.firestore_bank.document(c.getCoinId()).set(c);
-                                        LoginActivity.firestore_user.update("numOfCoinzToday", num);
-                                        Toast.makeText(getContext(),"Coin Deposited", Toast.LENGTH_SHORT).show();
+                                        LoginActivity.firestore_user.update("numOfCoinzToday", numOfCoinzToday);
+                                        SaveSharedPreference.setNumofBankedToday(getContext(),numOfCoinzToday ,LoginActivity.mEmailView.toString() );
+                                        Toast.makeText(getContext(), "Coin Deposited", Toast.LENGTH_SHORT).show();
+                                        removeCoin(position);
                                     }
-
+                                    else{
+                                        Toast.makeText(getContext(), "Bank Limit of 25 Deposits Reached for Today", Toast.LENGTH_SHORT).show();
+                                    }
                                     break;
                                 case R.id.Send:
-                                    /////////////////////////////////////////////////////////implement
                                     AlertDialog alertDialog = new AlertDialog.Builder(context).create();
                                     alertDialog.setTitle("Send Coin\n\n");
                                     alertDialog.setMessage("Enter email:");

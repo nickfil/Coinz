@@ -44,38 +44,35 @@ public class Bank_Activity extends AppCompatActivity {
 
 
         LoginActivity.firestore_bank.get()
-                .continueWithTask(new Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>() {
-                    @Override
-                    public Task<List<QuerySnapshot>> then(@NonNull Task<QuerySnapshot> task) {
-                        List<Task<QuerySnapshot>> tasks = new ArrayList<Task<QuerySnapshot>>();
-                        for (DocumentSnapshot ds : task.getResult()) {
-                            Coin c = new Coin((String) ds.get("coinCurrency"),
-                                              (Double) ds.get("coinValue"),
-                                              (String) ds.get("coinId"));
-                            bankCoinz.add(c);
+                .continueWithTask((Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>) task -> {
+                    List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+                    for (DocumentSnapshot ds : task.getResult()) {
+                        Coin c = new Coin((String) ds.get("coinCurrency"),
+                                          (Double) ds.get("coinValue"),
+                                          (String) ds.get("coinId"));
+                        bankCoinz.add(c);
 
-                        }
-
-                        bank = new Bank(MainActivity.todaysRates, bankCoinz);
-
-                        currencies = new ArrayList<>();
-                        values = new ArrayList<>();
-                        icon = new ArrayList<>();
-                        id = new ArrayList<>();
-
-                        if(!bank.getCoinz().isEmpty()) {
-                            for (Coin c : bank.getCoinz()) {
-                                currencies.add(c.getCoinCurrency());
-                                values.add(c.getCoinValue().toString()); //parallel arrays with each coin in wallet and its value
-                                icon.add(c.getIcon());
-                                id.add(c.getCoinId());
-                            }
-
-                            ListAdapter listAdapter = new ListAdapter(Bank_Activity.this, currencies, values, icon, id,2);
-                            listView.setAdapter(listAdapter);
-                        }
-                        return Tasks.whenAllSuccess(tasks);
                     }
+
+                    bank = new Bank(MainActivity.todaysRates, bankCoinz);
+
+                    currencies = new ArrayList<>();
+                    values = new ArrayList<>();
+                    icon = new ArrayList<>();
+                    id = new ArrayList<>();
+
+                    if(!bank.getCoinz().isEmpty()) {
+                        for (Coin c : bank.getCoinz()) {
+                            currencies.add(c.getCoinCurrency());
+                            values.add(c.getCoinValue().toString()); //parallel arrays with each coin in wallet and its value
+                            icon.add(c.getIcon());
+                            id.add(c.getCoinId());
+                        }
+
+                        ListAdapter listAdapter = new ListAdapter(Bank_Activity.this, currencies, values, icon, id,2);
+                        listView.setAdapter(listAdapter);
+                    }
+                    return Tasks.whenAllSuccess(tasks);
                 });
 
     }

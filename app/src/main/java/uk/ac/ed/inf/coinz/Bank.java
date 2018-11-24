@@ -1,16 +1,8 @@
 package uk.ac.ed.inf.coinz;
 
-import android.util.Log;
-
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-
-import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class Bank {
     private int numOfCoinzToday;
@@ -19,7 +11,7 @@ public class Bank {
     private Double QUIDs;
     private Double PENYs;
     private HashMap<String,Double> rates;
-    private ArrayList<Coin> bankCoinz = new ArrayList<>();
+    private ArrayList<Coin> bankCoinz;
 
     public Bank(HashMap<String,Double> rates, ArrayList<Coin> bankCoinz){
         this.rates = rates;
@@ -47,30 +39,6 @@ public class Bank {
                 }
         }
 
-    }
-
-    public boolean addCoinz(Coin c){
-        switch (c.getCoinCurrency()) {
-            case "SHIL":
-                SHILs += c.getCoinValue();
-                break;
-            case "DOLR":
-                DOLRs += c.getCoinValue();
-                break;
-            case "QUID":
-                QUIDs += c.getCoinValue();
-                break;
-            default:
-                PENYs += c.getCoinValue();
-                break;
-        }
-
-        bankCoinz.add(c);
-
-        //saving the new coin to the bank
-        LoginActivity.firestore_bank.document(c.getCoinId()).set(c);
-
-        return true;
     }
 
     public Double getCoinAmount(String currency, HashMap<String, Double>  rates){

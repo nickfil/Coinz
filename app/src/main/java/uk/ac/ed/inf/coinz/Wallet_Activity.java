@@ -2,9 +2,7 @@ package uk.ac.ed.inf.coinz;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -19,6 +17,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Wallet_Activity extends AppCompatActivity {
 
@@ -39,38 +38,35 @@ public class Wallet_Activity extends AppCompatActivity {
         walletCoinz = new ArrayList<>();
 
         LoginActivity.firestore_wallet.get()
-                .continueWithTask(new Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>() {
-                    @Override
-                    public Task<List<QuerySnapshot>> then(@NonNull Task<QuerySnapshot> task) {
-                        List<Task<QuerySnapshot>> tasks = new ArrayList<Task<QuerySnapshot>>();
-                        for (DocumentSnapshot ds : task.getResult()) {
-                            Coin c = new Coin((String) ds.get("coinCurrency"),
-                                    (Double) ds.get("coinValue"),
-                                    (String) ds.get("coinId"));
-                            walletCoinz.add(c);
+                .continueWithTask((Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>) task -> {
+                    List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+                    for (DocumentSnapshot ds : Objects.requireNonNull(task.getResult())) {
+                        Coin c = new Coin((String) ds.get("coinCurrency"),
+                                (Double) ds.get("coinValue"),
+                                (String) ds.get("coinId"));
+                        walletCoinz.add(c);
 
-                        }
-
-                        wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
-
-                        currencies = new ArrayList<>();
-                        values = new ArrayList<>();
-                        icon = new ArrayList<>();
-                        id = new ArrayList<>();
-
-                        if(!wallet.getCoinz().isEmpty()) {
-                            for (Coin c : wallet.getCoinz()) {
-                                currencies.add(c.getCoinCurrency());
-                                values.add(c.getCoinValue().toString()); //parallel arrays with each coin in wallet and its value
-                                icon.add(c.getIcon());
-                                id.add(c.getCoinId());
-                            }
-
-                            ListAdapter listAdapter = new ListAdapter(Wallet_Activity.this, currencies, values, icon, id,1);
-                            listView.setAdapter(listAdapter);
-                        }
-                        return Tasks.whenAllSuccess(tasks);
                     }
+
+                    wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
+
+                    currencies = new ArrayList<>();
+                    values = new ArrayList<>();
+                    icon = new ArrayList<>();
+                    id = new ArrayList<>();
+
+                    if(!wallet.getCoinz().isEmpty()) {
+                        for (Coin c : wallet.getCoinz()) {
+                            currencies.add(c.getCoinCurrency());
+                            values.add(c.getCoinValue().toString()); //parallel arrays with each coin in wallet and its value
+                            icon.add(c.getIcon());
+                            id.add(c.getCoinId());
+                        }
+
+                        ListAdapter listAdapter = new ListAdapter(Wallet_Activity.this, currencies, values, icon, id,1);
+                        listView.setAdapter(listAdapter);
+                    }
+                    return Tasks.whenAllSuccess(tasks);
                 });
 
 
