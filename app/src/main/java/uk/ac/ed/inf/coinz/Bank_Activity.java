@@ -2,26 +2,22 @@ package uk.ac.ed.inf.coinz;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ListView;
 
 import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Bank_Activity extends AppCompatActivity {
 
@@ -42,11 +38,11 @@ public class Bank_Activity extends AppCompatActivity {
         listView = findViewById(R.id.listView);
         bankCoinz = new ArrayList<>();
 
-
+        //establishing connection with the firestore to get the users bank
         LoginActivity.firestore_bank.get()
                 .continueWithTask((Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>) task -> {
                     List<Task<QuerySnapshot>> tasks = new ArrayList<>();
-                    for (DocumentSnapshot ds : task.getResult()) {
+                    for (DocumentSnapshot ds : Objects.requireNonNull(task.getResult())) {
                         Coin c = new Coin((String) ds.get("coinCurrency"),
                                           (Double) ds.get("coinValue"),
                                           (String) ds.get("coinId"));
@@ -56,6 +52,7 @@ public class Bank_Activity extends AppCompatActivity {
 
                     bank = new Bank(MainActivity.todaysRates, bankCoinz);
 
+                    //creating lists for list adapter - so that the coinz can be visualized in the ui
                     currencies = new ArrayList<>();
                     values = new ArrayList<>();
                     icon = new ArrayList<>();
@@ -69,6 +66,7 @@ public class Bank_Activity extends AppCompatActivity {
                             id.add(c.getCoinId());
                         }
 
+                        //sending everything to the list adapter so they are visualized
                         ListAdapter listAdapter = new ListAdapter(Bank_Activity.this, currencies, values, icon, id,2);
                         listView.setAdapter(listAdapter);
                     }

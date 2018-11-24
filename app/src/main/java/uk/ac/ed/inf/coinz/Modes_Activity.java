@@ -2,29 +2,23 @@ package uk.ac.ed.inf.coinz;
 
 import android.content.Intent;
 import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.webkit.SafeBrowsingResponse;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.Switch;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.text.CollationElementIterator;
+import java.util.Objects;
 
 public class Modes_Activity extends AppCompatActivity {
 
     private Switch backgroundModeSwitch;
     private Switch recordDistanceSwitch;
-    private Button setNickname;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +33,7 @@ public class Modes_Activity extends AppCompatActivity {
             if (e != null) {
                 Log.e("hey", e.getMessage());
             } else if (documentSnapshot != null && documentSnapshot.exists()) {
-                backgroundModeSwitch.setChecked((Boolean) documentSnapshot.getData().get("backgroundSwitch"));
+                backgroundModeSwitch.setChecked((Boolean) Objects.requireNonNull(documentSnapshot.getData()).get("backgroundSwitch"));
                 Log.d(String.valueOf(backgroundModeSwitch), "fetched correctly");
             }
         });
@@ -49,57 +43,45 @@ public class Modes_Activity extends AppCompatActivity {
             if (e != null) {
                 Log.e("hey", e.getMessage());
             } else if (documentSnapshot != null && documentSnapshot.exists()) {
-                recordDistanceSwitch.setChecked((Boolean) documentSnapshot.getData().get("distanceSwitch"));
+                recordDistanceSwitch.setChecked((Boolean) Objects.requireNonNull(documentSnapshot.getData()).get("distanceSwitch"));
                 Log.d(String.valueOf(recordDistanceSwitch), "fetched correctly");
             }
         });
 
 
-        backgroundModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.v("Switch State=", ""+isChecked);
-                if(isChecked) {
-                    MainActivity.mode = "Background";
-                    LoginActivity.firestore_user.update("backgroundSwitch", true);
-                }
-                else{
-                    MainActivity.mode = "Classic";
-                    LoginActivity.firestore_user.update("backgroundSwitch", false);
-                }
-                Log.d(MainActivity.mode, "Mode has changed");
+        backgroundModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.v("Switch State=", ""+isChecked);
+            if(isChecked) {
+                MainActivity.mode = "Background";
+                LoginActivity.firestore_user.update("backgroundSwitch", true);
             }
-
+            else{
+                MainActivity.mode = "Classic";
+                LoginActivity.firestore_user.update("backgroundSwitch", false);
+            }
+            Log.d(MainActivity.mode, "Mode has changed");
         });
 
-        recordDistanceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.v("Switch State=", ""+isChecked);
-                if(isChecked) {
-                    recordDistanceSwitch.setChecked(true);
-                    LoginActivity.firestore_user.update("distanceSwitch", true);
-                }
-                else{
-                    recordDistanceSwitch.setChecked(false);
-                    LoginActivity.firestore_user.update("distanceSwitch", false);
-                }
-                Log.d(MainActivity.mode, "Mode has changed");
+        recordDistanceSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.v("Switch State=", ""+isChecked);
+            if(isChecked) {
+                recordDistanceSwitch.setChecked(true);
+                LoginActivity.firestore_user.update("distanceSwitch", true);
             }
-
+            else{
+                recordDistanceSwitch.setChecked(false);
+                LoginActivity.firestore_user.update("distanceSwitch", false);
+            }
+            Log.d(MainActivity.mode, "Mode has changed");
         });
 
 
         //updating the nickname in the online database when it is updated here
 
-        setNickname = findViewById(R.id.setNickname);
+        Button setNickname = findViewById(R.id.setNickname);
         TextInputEditText usrnm = findViewById(R.id.EditNickname);
 
-        setNickname.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                LoginActivity.firestore_user.update("nickname", usrnm.getEditableText().toString());
-            }
-        });
+        setNickname.setOnClickListener(v -> LoginActivity.firestore_user.update("nickname", usrnm.getEditableText().toString()));
 
     }
 

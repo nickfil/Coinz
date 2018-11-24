@@ -37,6 +37,7 @@ public class Wallet_Activity extends AppCompatActivity {
         listView = findViewById(R.id.listView);
         walletCoinz = new ArrayList<>();
 
+        //preparing each coin from the database to be sent to the listAdapter class and made as a list in the ui
         LoginActivity.firestore_wallet.get()
                 .continueWithTask((Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>) task -> {
                     List<Task<QuerySnapshot>> tasks = new ArrayList<>();

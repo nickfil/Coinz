@@ -6,12 +6,14 @@ public class Coin { //coin object, contains a currency, value and an id
     private String currency;
     private Double value;
 
+    //each coin consists of a currency, a value and an id, it is all the information needed
     public Coin(String currency, Double value, String id){
         this.id=id;
         this.currency=currency;
         this.value=value;
     }
 
+    //method that returns the icon (colour) of the coin, depending on its currency
     public Integer getIcon(){
         switch (currency){
             case "SHIL":

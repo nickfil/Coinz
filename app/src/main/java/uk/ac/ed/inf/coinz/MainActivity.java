@@ -78,12 +78,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         enableLocation();
 
 
-        @SuppressLint("SimpleDateFormat") DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+        @SuppressLint("SimpleDateFormat") DateFormat df = new SimpleDateFormat("yyyy/MM/dd"); //getting the date in a string format
         Date date = new Date();
         String dt = df.format(date);
         String json = "";
         Log.d(dt, "Date format");
-        String mapURLstring = "http://homepages.inf.ed.ac.uk/stg/coinz/"+dt+"/coinzmap.geojson";
+        String mapURLstring = "http://homepages.inf.ed.ac.uk/stg/coinz/"+dt+"/coinzmap.geojson"; //getting the json file from the website
 
         DownloadFileTask getData = new DownloadFileTask();
 
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //getting rates of today's date currencies
         JsonParser parser = new JsonParser();
         JsonObject tempObj = (JsonObject) parser.parse(json);
-        JsonObject rates = (JsonObject) tempObj.get("rates");
+        JsonObject rates = (JsonObject) tempObj.get("rates"); //getting the rates from the online json file
 
         todaysRates.put("SHIL", Double.valueOf(rates.get("SHIL").toString()));
         todaysRates.put("QUID", Double.valueOf(rates.get("QUID").toString()));

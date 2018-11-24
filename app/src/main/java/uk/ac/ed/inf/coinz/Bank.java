@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Bank {
-    private int numOfCoinzToday;
     private Double SHILs;
     private Double DOLRs;
     private Double QUIDs;
@@ -13,10 +12,10 @@ public class Bank {
     private HashMap<String,Double> rates;
     private ArrayList<Coin> bankCoinz;
 
-    public Bank(HashMap<String,Double> rates, ArrayList<Coin> bankCoinz){
+    public Bank(HashMap<String,Double> rates, ArrayList<Coin> bankCoinz){  //getting the rates and coinz in the bank when initializing
         this.rates = rates;
         this.bankCoinz = bankCoinz;
-        SHILs=0.0;
+        SHILs=0.0;  //making sure all currencies are null before loading the data
         DOLRs=0.0;
         QUIDs=0.0;
         PENYs=0.0;
@@ -41,7 +40,7 @@ public class Bank {
 
     }
 
-    public Double getCoinAmount(String currency, HashMap<String, Double>  rates){
+    public Double getCoinAmount(String currency, HashMap<String, Double>  rates){  //method that returns the amount of each currency and total gold in ones bank
         if(bankCoinz.isEmpty()) return 0.0;
 
         switch (currency) {
@@ -61,7 +60,7 @@ public class Bank {
         }
     }
 
-    public ArrayList<Coin> getCoinz(){return bankCoinz;}
+    public ArrayList<Coin> getCoinz(){return bankCoinz;} //returns all coinz in the bank
 
 
 }

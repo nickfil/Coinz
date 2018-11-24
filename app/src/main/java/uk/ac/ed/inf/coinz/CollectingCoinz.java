@@ -2,11 +2,7 @@ package uk.ac.ed.inf.coinz;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.DialogInterface;
 import android.location.Location;
-import android.service.autofill.SaveRequest;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.tasks.Continuation;
@@ -20,7 +16,6 @@ import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
-import com.mapbox.mapboxsdk.annotations.MarkerView;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -52,7 +47,7 @@ public class CollectingCoinz {
             if (e != null) {
                 Log.e("hey", e.getMessage());
             } else if (documentSnapshot != null && documentSnapshot.exists()) {
-                totalDistanceWalked = (Double) documentSnapshot.getData().get("totalDistanceWalked");
+                totalDistanceWalked = (Double) documentSnapshot.getData().get("totalDistanceWalked");       //getting the total distance walked from online db
                 Log.d(String.valueOf(totalDistanceWalked), "fetched correctly");
             }
         });
@@ -61,7 +56,7 @@ public class CollectingCoinz {
             if (e != null) {
                 Log.e("num of coinz", e.getMessage());
             } else if (documentSnapshot != null && documentSnapshot.exists()) {
-                recordDistance = (Boolean) (documentSnapshot.getData().get("distanceSwitch"));
+                recordDistance = (Boolean) (documentSnapshot.getData().get("distanceSwitch"));       //getting the the distance switch from online db - one can turn off the distance recording
                 Log.d(String.valueOf(recordDistance), "fetched correctly");
             }
         });
@@ -70,7 +65,7 @@ public class CollectingCoinz {
 
 
     public void initializeMap(MapboxMap map){
-        for(Feature feat : fc.features()){
+        for(Feature feat : Objects.requireNonNull(fc.features())){
             Point pt = (Point) feat.geometry();
             JsonObject j = feat.properties();
 
@@ -104,12 +99,13 @@ public class CollectingCoinz {
                     .snippet(String.valueOf(j.get("id")).substring(1, String.valueOf(j.get("id")).length()-1));
 
 
+            //if a marker is in the wallet, it is not plotted
             LoginActivity.firestore_wallet.get()
                 .continueWithTask((Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>) task -> {
                     List<Task<QuerySnapshot>> tasks = new ArrayList<>();
 
                     for (DocumentSnapshot ds : Objects.requireNonNull(task.getResult())) {
-                        Log.d(String.valueOf(ds.get("coinId")), "yoooooooooo");
+                        Log.d(String.valueOf(ds.get("coinId")), "Coin ID - in CollectingCoinz");
                         Coin c = new Coin((String) ds.get("coinCurrency"),
                                 (Double) ds.get("coinValue"),
                                 (String) ds.get("coinId"));
@@ -132,7 +128,7 @@ public class CollectingCoinz {
     }
 
     public void checkCoinCollection(MapboxMap map, Location location){
-        Log.d("location has changed", "Location has changed");
+        Log.d("location has changed", "Location has changed - in CollectingCoinz");
         //whenever the location changes, we are checking to see if the user is within 25 metres of any coin
         for(MarkerViewOptions tempMarker:markers) {
             float[] distance = new float[1];
@@ -141,88 +137,85 @@ public class CollectingCoinz {
                     location.getLongitude(), //and each marker
                     tempMarker.getPosition().getLatitude(),
                     tempMarker.getPosition().getLongitude(), distance);
-            Log.d(String.valueOf(distance[0]), "distance with coin");
+            Log.d(String.valueOf(distance[0]), "distance with coin - in CollectingCoinz");
             Log.d(tempMarker.getSnippet(), "Marker ID");
 
 
 
              LoginActivity.firestore_wallet.get()
-                .continueWithTask(new Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>() {
-                    @Override
-                    public Task<List<QuerySnapshot>> then(@NonNull Task<QuerySnapshot> task) {
-                        List<Task<QuerySnapshot>> tasks = new ArrayList<Task<QuerySnapshot>>();
-                        for (DocumentSnapshot ds : task.getResult()) {
-                            Log.d(String.valueOf(ds.get("coinId")), "yoooooooooo");
-                            Coin c = new Coin((String) ds.get("coinCurrency"),
-                                    (Double) ds.get("coinValue"),
-                                    (String) ds.get("coinId"));
-                            walletCoinz.add(c);
+                .continueWithTask((Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>) task -> {
+                    List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+                    for (DocumentSnapshot ds : Objects.requireNonNull(task.getResult())) {
+                        Log.d(String.valueOf(ds.get("coinId")), "Coin ID - in CollectingCoinz");
+                        Coin c = new Coin((String) ds.get("coinCurrency"),
+                                (Double) ds.get("coinValue"),
+                                (String) ds.get("coinId"));
+                        walletCoinz.add(c);
 
-                        }
-
-                        wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
-
-
-                        if (distance[0] < 25 && !wallet.contains(tempMarker.getSnippet())) {
-
-                            if (MainActivity.mode.equals("Classic")) {
-
-                                AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-                                alertDialog.setTitle("Coin Collection Available\n\n");
-                                alertDialog.setMessage("Do you want to collect this coin?" + "\n\n" + tempMarker.getTitle());
-                                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes",
-                                        (dialog, i) -> {
-
-                                            String[] currency_value = tempMarker.getTitle().split(":");
-                                            wallet.addCoinz(currency_value[0], Double.valueOf(currency_value[1]), tempMarker.getSnippet());
-                                            Log.d(String.valueOf(wallet.getCoinAmount(currency_value[0])), "coin is collected");
-
-                                            //after a marker is collected by a player, it must be removed from the map
-                                            map.removeMarker(tempMarker.getMarker());
-                                            markers.remove(tempMarker.getMarker()); //it must also be removed from our marker array list so it is not plotted again
-                                            fc.features().remove(tempMarker.getMarker());
-
-                                            dialog.dismiss();
-                                        });
-                                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No", (dialog, i) -> dialog.dismiss());
-                                alertDialog.show();
-                            } else {
-
-
-                                String[] currency_value = tempMarker.getTitle().split(":");
-                                wallet.addCoinz(currency_value[0], Double.valueOf(currency_value[1]), tempMarker.getSnippet());
-                                Log.d(String.valueOf(wallet.getCoinAmount(currency_value[0])), "coin is collected");
-
-                                //after a marker is collected by a player, it must be removed from the map
-                                map.removeMarker(tempMarker.getMarker());
-                                markers.remove(tempMarker.getMarker()); //it must also be removed from our marker array list so it is not plotted again
-                                fc.features().remove(tempMarker.getMarker());
-
-
-                            }
-
-
-                            if(recordDistance){
-                                if(prevLocation==null){
-                                    prevLocation = location;
-                                    Log.d("location", "location created");
-                                }
-                                //add distance walked every time the location is updated
-                                else{
-                                    Location.distanceBetween(prevLocation.getLatitude(),
-                                            prevLocation.getLongitude(),
-                                            location.getLatitude(),
-                                            location.getLongitude(), distance);
-
-                                    totalDistanceWalked += distance[0];
-                                    Log.d("Distance Updated", totalDistanceWalked.toString());
-                                    LoginActivity.firestore_user.update("totalDistanceWalked", totalDistanceWalked);
-                                }
-                            }
-                        }
-
-                        return Tasks.whenAllSuccess(tasks);
                     }
+
+                    wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
+
+
+                    if (distance[0] < 25 && !wallet.contains(tempMarker.getSnippet())) {
+
+                        if (MainActivity.mode.equals("Classic")) { //if the mode is classic, then we have a popup asking if the coin should be collected, otherwise it is collected automatically
+
+                            AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+                            alertDialog.setTitle("Coin Collection Available\n\n");
+                            alertDialog.setMessage("Do you want to collect this coin?" + "\n\n" + tempMarker.getTitle());
+                            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes",
+                                    (dialog, i) -> {
+
+                                        String[] currency_value = tempMarker.getTitle().split(":");
+                                        wallet.addCoinz(currency_value[0], Double.valueOf(currency_value[1]), tempMarker.getSnippet());
+                                        Log.d(String.valueOf(wallet.getCoinAmount(currency_value[0])), "coin is collected");
+
+                                        //after a marker is collected by a player, it must be removed from the map
+                                        map.removeMarker(tempMarker.getMarker());
+                                        markers.remove(tempMarker.getMarker()); //it must also be removed from our marker array list so it is not plotted again
+                                        fc.features().remove(tempMarker.getMarker());
+
+                                        dialog.dismiss();
+                                    });
+                            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No", (dialog, i) -> dialog.dismiss());
+                            alertDialog.show();
+                        } else {
+
+
+                            String[] currency_value = tempMarker.getTitle().split(":");
+                            wallet.addCoinz(currency_value[0], Double.valueOf(currency_value[1]), tempMarker.getSnippet());
+                            Log.d(String.valueOf(wallet.getCoinAmount(currency_value[0])), "coin is collected");
+
+                            //after a marker is collected by a player, it must be removed from the map
+                            map.removeMarker(tempMarker.getMarker());
+                            markers.remove(tempMarker.getMarker()); //it must also be removed from our marker array list so it is not plotted again
+                            fc.features().remove(tempMarker.getMarker());
+
+
+                        }
+
+
+                        if(recordDistance){
+                            if(prevLocation==null){
+                                prevLocation = location;
+                                Log.d("location", "location created");
+                            }
+                            //add distance walked every time the location is updated
+                            else{
+                                Location.distanceBetween(prevLocation.getLatitude(),
+                                        prevLocation.getLongitude(),
+                                        location.getLatitude(),
+                                        location.getLongitude(), distance);
+
+                                totalDistanceWalked += distance[0];
+                                Log.d("Distance Updated", totalDistanceWalked.toString());
+                                LoginActivity.firestore_user.update("totalDistanceWalked", totalDistanceWalked);
+                            }
+                        }
+                    }
+
+                    return Tasks.whenAllSuccess(tasks);
                 });
 
 

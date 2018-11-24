@@ -34,6 +34,7 @@ public class Player_Activity extends AppCompatActivity {
         username="";
         distance=0.0;
 
+        //getting total distance walked from database to profile page
         LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
             if (e != null) {
                 Log.e("num of coinz", e.getMessage());
@@ -46,6 +47,7 @@ public class Player_Activity extends AppCompatActivity {
             }
         });
 
+        //getting the user nickname
         LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
             if (e != null) {
                 Log.e("num of coinz", e.getMessage());
@@ -58,6 +60,7 @@ public class Player_Activity extends AppCompatActivity {
             }
         });
 
+        //getting the amounts of each currency every user has
         LoginActivity.firestore_bank.get()
                 .continueWithTask((Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>) task -> {
                     List<Task<QuerySnapshot>> tasks = new ArrayList<>();

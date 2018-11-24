@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class Rates_Activity extends AppCompatActivity {
 
+    //this activity contains the rates, so a player can know which coinz to collect more and deposit
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

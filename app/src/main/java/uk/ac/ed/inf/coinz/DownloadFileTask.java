@@ -39,8 +39,7 @@ public class DownloadFileTask extends AsyncTask<String, Void, String> {
 
     @NonNull
     private String readStream(InputStream stream) throws IOException {
-        String resultSTR = IOUtils.toString(stream, StandardCharsets.UTF_8);
-        return resultSTR;
+        return IOUtils.toString(stream, StandardCharsets.UTF_8);
     }
 
     @Override

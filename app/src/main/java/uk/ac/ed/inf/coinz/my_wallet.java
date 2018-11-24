@@ -1,22 +1,7 @@
 package uk.ac.ed.inf.coinz;
 
-import android.support.annotation.NonNull;
-import android.util.Log;
-
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
-
-import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class my_wallet{
 
@@ -37,38 +22,39 @@ public class my_wallet{
 
         if(!walletCoinz.isEmpty()) {
             for (Coin c : walletCoinz) {
-                if(c.getCoinCurrency().equals("SHIL")){
-                    SHILs+=c.getCoinValue();
-                }
-                else if(c.getCoinCurrency().equals("DOLR")){
-                    DOLRs+=c.getCoinValue();
-                }
-                else if(c.getCoinCurrency().equals("QUID")){
-                    QUIDs+=c.getCoinValue();
-                }
-                else{
-                    PENYs+=c.getCoinValue();
+                switch (c.getCoinCurrency()) {
+                    case "SHIL":
+                        SHILs += c.getCoinValue();
+                        break;
+                    case "DOLR":
+                        DOLRs += c.getCoinValue();
+                        break;
+                    case "QUID":
+                        QUIDs += c.getCoinValue();
+                        break;
+                    default:
+                        PENYs += c.getCoinValue();
+                        break;
                 }
             }
         }
     }
 
-    public HashMap<String, Double> getRates() {
-        return rates;
-    }
 
     public void addCoinz(String currency, Double amount, String id){ //when adding a coin to the wallet we need to check the currency
-        if(currency.equals("SHIL")){                                        //and then add it to the relevant sub wallet
-            SHILs+=amount;
-        }
-        else if(currency.equals("DOLR")){
-            DOLRs+=amount;
-        }
-        else if(currency.equals("QUID")){
-            QUIDs+=amount;
-        }
-        else{
-            PENYs+=amount;
+        switch (currency) {
+            case "SHIL":                                         //and then add it to the relevant sub wallet
+                SHILs += amount;
+                break;
+            case "DOLR":
+                DOLRs += amount;
+                break;
+            case "QUID":
+                QUIDs += amount;
+                break;
+            default:
+                PENYs += amount;
+                break;
         }
 
         Coin c = new Coin(currency, amount, id);
@@ -98,7 +84,7 @@ public class my_wallet{
         return walletCoinz;
     }
 
-    public Boolean contains(String id){
+    public Boolean contains(String id){ //using a different contains method for our coin objects - to be able to realize if two objects have the exact same contents
         for(Coin c : walletCoinz){
             if(c.getCoinId().equals(id)){
                 return true;

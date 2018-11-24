@@ -74,7 +74,7 @@ public class KommunicatorActivity extends AppCompatActivity {
                 .addOnSuccessListener(v -> Toast.makeText(getApplicationContext(),
                 "Message sent!",
                 Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> { Log.e(TAG, e.getMessage()); });
+                .addOnFailureListener(e -> Log.e(TAG, e.getMessage()));
     }
 
     private void realtimeUpdateListener() {
