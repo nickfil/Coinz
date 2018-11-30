@@ -1,6 +1,7 @@
 package uk.ac.ed.inf.coinz;
 
 import android.content.Intent;
+import android.provider.Telephony;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -122,13 +123,13 @@ public class Modes_Activity extends AppCompatActivity {
 
             case R.id.Chat_Option:
 
-                intent = new Intent(this, Rates_Activity.class);
+                intent = new Intent(this, KommunicatorActivity.class);
                 startActivity(intent);
                 return true;
 
             case R.id.Rates_Option:
 
-                intent = new Intent(this, KommunicatorActivity.class);
+                intent = new Intent(this, Rates_Activity.class);
                 startActivity(intent);
                 return true;
 

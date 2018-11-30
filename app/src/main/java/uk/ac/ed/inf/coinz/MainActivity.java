@@ -1,6 +1,7 @@
 package uk.ac.ed.inf.coinz;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.Lifecycle;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -186,6 +187,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         locationLayerPlugin.setLocationLayerEnabled(true);
         locationLayerPlugin.setCameraMode(CameraMode.TRACKING);
         locationLayerPlugin.setRenderMode(RenderMode.NORMAL);
+        Lifecycle lifecycle = getLifecycle();
+        lifecycle.addObserver(locationLayerPlugin);
     }
 
     private void setCameraPosition(Location location){
@@ -231,13 +234,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onStart() {
         super.onStart();
+        mapView.onStart();
         if(locationEngine!=null){
-            locationEngine.requestLocationUpdates();
+            try {
+                locationEngine.requestLocationUpdates();
+            } catch(SecurityException ignored) {}
+            locationEngine.addLocationEngineListener(this);
         }
         if(locationLayerPlugin!=null){
             locationLayerPlugin.onStart();
         }
-        mapView.onStart();
 
     }
 
@@ -256,13 +262,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onStop() {
         super.onStop();
+        mapView.onStop();
         if(locationEngine!=null){
             locationEngine.removeLocationUpdates();
+            locationEngine.removeLocationEngineListener(this);
         }
         if(locationLayerPlugin!=null){
             locationLayerPlugin.onStop();
         }
-        mapView.onStop();
     }
 
     @Override

@@ -85,7 +85,7 @@ public class ListAdapter extends ArrayAdapter{
                         case R.id.Deposit:
 
                             String numOfCoinzTodayPlayer = SaveSharedPreference.getNumofBankedToday(getContext(), LoginActivity.mEmailView.toString());
-                            Log.d(numOfCoinzTodayPlayer, "heyyyyyyy");
+                            Log.d(numOfCoinzTodayPlayer, "Number of Coinz Today");
                             int numOfCoinzToday = Integer.valueOf(numOfCoinzTodayPlayer);
                             //keeping the number of banked coins in shared preferences to have it when the task ends
                             if(numOfCoinzToday<25) {

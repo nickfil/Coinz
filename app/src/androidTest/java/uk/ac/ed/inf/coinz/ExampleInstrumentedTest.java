@@ -2,8 +2,11 @@ package uk.ac.ed.inf.coinz;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.LargeTest;
+import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,4 +26,20 @@ public class ExampleInstrumentedTest {
 
         assertEquals("uk.ac.ed.inf.coinz", appContext.getPackageName());
     }
+
+    @LargeTest
+    @RunWith(AndroidJUnit4.class)
+    public class MainActivityTest {
+        @Rule
+        public ActivityTestRule<MainActivity> mActivityTestRule =
+                new ActivityTestRule<>(MainActivity.class);
+        @Test
+        public void mainActivityTest() {
+
+        }
+
+    }
+
 }
+
+
