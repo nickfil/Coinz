@@ -11,6 +11,9 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.JsonObject;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
@@ -18,11 +21,18 @@ import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
@@ -34,7 +44,9 @@ public class CollectingCoinz {
     private Location prevLocation;
     private Double totalDistanceWalked;
     public static Boolean recordDistance=false;
+    public static Boolean routeSwitch=false;
     private my_wallet wallet;
+    private NavigationMapRoute navigationMapRoute;
     ArrayList<Coin> walletCoinz = new ArrayList<>();
 
 
@@ -45,7 +57,7 @@ public class CollectingCoinz {
 
         LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
             if (e != null) {
-                Log.e("hey", e.getMessage());
+                Log.e("CollectingCoinz", e.getMessage());
             } else if (documentSnapshot != null && documentSnapshot.exists()) {
                 totalDistanceWalked = (Double) documentSnapshot.getData().get("totalDistanceWalked");       //getting the total distance walked from online db
                 Log.d(String.valueOf(totalDistanceWalked), "fetched correctly");
@@ -54,10 +66,27 @@ public class CollectingCoinz {
 
         LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
             if (e != null) {
-                Log.e("num of coinz", e.getMessage());
+                Log.e("CollectingCoinz", e.getMessage());
             } else if (documentSnapshot != null && documentSnapshot.exists()) {
                 recordDistance = (Boolean) (documentSnapshot.getData().get("distanceSwitch"));       //getting the the distance switch from online db - one can turn off the distance recording
                 Log.d(String.valueOf(recordDistance), "fetched correctly");
+            }
+        });
+
+        LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
+            if (e != null) {
+                Log.e("CollectingCoinz", e.getMessage());
+            } else if (documentSnapshot != null && documentSnapshot.exists()) {
+                MainActivity.mode = String.valueOf((Boolean) (documentSnapshot.getData().get("backgroundSwitch")));       //getting the the background switch from online db - one can turn off the background mode                Log.d(String.valueOf(MainActivity.mode), "fetched correctly");
+            }
+        });
+
+        LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
+            if (e != null) {
+                Log.e("CollectingCoinz", e.getMessage());
+            } else if (documentSnapshot != null && documentSnapshot.exists()) {
+                routeSwitch = (Boolean) (documentSnapshot.getData().get("routeSwitch"));       //getting the the route switch from online db - one can turn off the route showing
+                Log.d(String.valueOf(routeSwitch), "fetched correctly");
             }
         });
 
@@ -217,13 +246,86 @@ public class CollectingCoinz {
 
                     return Tasks.whenAllSuccess(tasks);
                 });
-
-
-
-
-
-
         }
+    }
+
+    public void routeCreator(MapboxMap map, Location location, MapView mapView) {
+
+        //establishing async task connection, to be able to have access to the wallet and the routeSwitch
+        LoginActivity.firestore_wallet.get()
+                .continueWithTask((Continuation<QuerySnapshot, Task<List<QuerySnapshot>>>) task -> {
+                    List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+                    for (DocumentSnapshot ds : Objects.requireNonNull(task.getResult())) {
+                        Log.d(String.valueOf(ds.get("coinId")), "Coin ID - in CollectingCoinz");
+                        Coin c = new Coin((String) ds.get("coinCurrency"),
+                                (Double) ds.get("coinValue"),
+                                (String) ds.get("coinId"));
+                        walletCoinz.add(c);
+
+                    }
+
+                    if(routeSwitch) {//checking if the user wants the route to be shown
+
+                        wallet = new my_wallet(MainActivity.todaysRates, walletCoinz);
+
+                        float minDistance = 500;
+                        Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+                        MarkerViewOptions finalMarker = null;
+
+                        for (MarkerViewOptions tempMarker : markers) {
+                            float[] distance = new float[1];
+
+                            Location.distanceBetween(location.getLatitude(), //calculating distance between current location
+                                    location.getLongitude(), //and each marker
+                                    tempMarker.getPosition().getLatitude(),
+                                    tempMarker.getPosition().getLongitude(), distance);
+
+                            if (distance[0] < minDistance && !wallet.contains(tempMarker.getSnippet())) {
+                                minDistance = distance[0];
+                                finalMarker = tempMarker; //finding the closest marker, in order to create route for that specific one
+                            }
+                        }
+
+                        Point finalPoint = Point.fromLngLat(finalMarker.getPosition().getLongitude(), finalMarker.getPosition().getLatitude());
+
+                        //creating navigation route
+                        NavigationRoute.builder()
+                                .accessToken("pk.eyJ1Ijoibmlja2ZpbCIsImEiOiJjam55bGRjZHEwZTh1M2xwOWpqdjRjcDhwIn0.FhMCVf5LAlvD7Im8-Xpsvw")
+                                .origin(origin)
+                                .destination(finalPoint)
+                                .profile(DirectionsCriteria.PROFILE_WALKING)
+                                .build()
+                                .getRoute(new Callback<DirectionsResponse>() {
+                                    @Override
+                                    public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                                        if (response.body() == null) {
+                                            Log.e("NavigationRoute", "No Routes Found - no response");
+                                            return;
+                                        } else if (response.body().routes().size() == 0) {
+                                            Log.e("NavigationRoute", "No Routes Found - size is 0");
+                                            return;
+                                        }
+
+                                        DirectionsRoute currentRoute = response.body().routes().get(0);
+
+                                        if(navigationMapRoute!=null){
+                                            navigationMapRoute.removeRoute();
+                                        } else {
+                                            navigationMapRoute = new NavigationMapRoute(null, mapView, map);
+                                        }
+                                        navigationMapRoute.addRoute(currentRoute);
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+                                        Log.e("NavigationRoute", "Error:"+t.getMessage());
+                                    }
+                                });
+
+                    }
+
+                    return Tasks.whenAllSuccess(tasks);
+                });
     }
 
 

@@ -20,6 +20,7 @@ public class Modes_Activity extends AppCompatActivity {
 
     private Switch backgroundModeSwitch;
     private Switch recordDistanceSwitch;
+    private Switch routeSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +29,7 @@ public class Modes_Activity extends AppCompatActivity {
 
         backgroundModeSwitch = findViewById(R.id.BackgroundModeSwitch);
         recordDistanceSwitch = findViewById(R.id.recordDistanceSwitch);
+        routeSwitch = findViewById(R.id.routeSwitch);
 
         //setting the background switch from firestore
         LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
@@ -46,6 +48,16 @@ public class Modes_Activity extends AppCompatActivity {
             } else if (documentSnapshot != null && documentSnapshot.exists()) {
                 recordDistanceSwitch.setChecked((Boolean) Objects.requireNonNull(documentSnapshot.getData()).get("distanceSwitch"));
                 Log.d(String.valueOf(recordDistanceSwitch), "fetched correctly");
+            }
+        });
+
+        //getting route switch from firestore
+        LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
+            if (e != null) {
+                Log.e("hey", e.getMessage());
+            } else if (documentSnapshot != null && documentSnapshot.exists()) {
+                routeSwitch.setChecked((Boolean) Objects.requireNonNull(documentSnapshot.getData()).get("routeSwitch"));
+                Log.d(String.valueOf(routeSwitch), "fetched correctly");
             }
         });
 
@@ -72,6 +84,19 @@ public class Modes_Activity extends AppCompatActivity {
             else{
                 recordDistanceSwitch.setChecked(false);
                 LoginActivity.firestore_user.update("distanceSwitch", false);
+            }
+            Log.d(MainActivity.mode, "Mode has changed");
+        });
+
+        routeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.v("Switch State=", ""+isChecked);
+            if(isChecked) {
+                routeSwitch.setChecked(true);
+                LoginActivity.firestore_user.update("routeSwitch", true);
+            }
+            else{
+                routeSwitch.setChecked(false);
+                LoginActivity.firestore_user.update("routeSwitch", false);
             }
             Log.d(MainActivity.mode, "Mode has changed");
         });

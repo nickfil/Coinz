@@ -103,6 +103,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private String nickname;
     private Boolean distanceSwitch;
     private Boolean backgroundSwitch;
+    private Boolean routeSwitch;
 
 
     @Override
@@ -181,6 +182,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                             backgroundSwitch = false;
                             initializingMap.put("backgroundSwitch", backgroundSwitch);
+
+                            routeSwitch = false;
+                            initializingMap.put("routeSwitch", routeSwitch);
 
                             @SuppressLint("SimpleDateFormat") DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
                             Date date = new Date();

@@ -206,9 +206,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onLocationChanged(Location location) {
         if(location!=null){
-            collectingCoinz.checkCoinCollection(map, location);
             originLocation=location;
-            setCameraPosition(location);
+            collectingCoinz.checkCoinCollection(map, location);
+            collectingCoinz.routeCreator(map, location, mapView);
+            setCameraPosition(originLocation);
         }
     }
 
