@@ -77,14 +77,6 @@ public class CollectingCoinz {
             if (e != null) {
                 Log.e("CollectingCoinz", e.getMessage());
             } else if (documentSnapshot != null && documentSnapshot.exists()) {
-                MainActivity.mode = String.valueOf((Boolean) (documentSnapshot.getData().get("backgroundSwitch")));       //getting the the background switch from online db - one can turn off the background mode                Log.d(String.valueOf(MainActivity.mode), "fetched correctly");
-            }
-        });
-
-        LoginActivity.firestore_user.addSnapshotListener((documentSnapshot, e) -> {
-            if (e != null) {
-                Log.e("CollectingCoinz", e.getMessage());
-            } else if (documentSnapshot != null && documentSnapshot.exists()) {
                 routeSwitch = (Boolean) (documentSnapshot.getData().get("routeSwitch"));       //getting the the route switch from online db - one can turn off the route showing
                 Log.d(String.valueOf(routeSwitch), "fetched correctly");
             }
